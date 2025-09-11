@@ -1,0 +1,167 @@
+<?= $this->extend('layouts/main') ?>
+
+<?= $this->section('content') ?>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Neuen Arbeitsauftrag erstellen
+                </h5>
+            </div>
+            <div class="card-body">
+                <?php if (session()->getFlashdata('errors')): ?>
+                    <div class="alert alert-danger">
+                        <h6>Bitte korrigieren Sie folgende Fehler:</h6>
+                        <ul class="mb-0">
+                            <?php foreach (session()->getFlashdata('errors') as $error): ?>
+                                <li><?= esc($error) ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                <?php endif; ?>
+
+                <form action="<?= base_url('work-orders') ?>" method="POST">
+                    <?= csrf_field() ?>
+                    
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="title" class="form-label">Titel <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="title" name="title" 
+                                   value="<?= old('title') ?>" required>
+                            <div class="form-text">Kurze, aussagekräftige Beschreibung des Arbeitsauftrags</div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="priority" class="form-label">Priorität <span class="text-danger">*</span></label>
+                            <select class="form-select" id="priority" name="priority" required>
+                                <option value="">Priorität wählen...</option>
+                                <option value="low" <?= old('priority') === 'low' ? 'selected' : '' ?>>Niedrig</option>
+                                <option value="medium" <?= old('priority') === 'medium' ? 'selected' : '' ?>>Mittel</option>
+                                <option value="high" <?= old('priority') === 'high' ? 'selected' : '' ?>>Hoch</option>
+                                <option value="critical" <?= old('priority') === 'critical' ? 'selected' : '' ?>>Kritisch</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="type" class="form-label">Typ <span class="text-danger">*</span></label>
+                            <select class="form-select" id="type" name="type" required>
+                                <option value="">Typ wählen...</option>
+                                <option value="preventive" <?= old('type') === 'preventive' ? 'selected' : '' ?>>Vorbeugend</option>
+                                <option value="corrective" <?= old('type') === 'corrective' ? 'selected' : '' ?>>Korrektiv</option>
+                                <option value="emergency" <?= old('type') === 'emergency' ? 'selected' : '' ?>>Notfall</option>
+                                <option value="inspection" <?= old('type') === 'inspection' ? 'selected' : '' ?>>Inspektion</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="asset_id" class="form-label">Anlage</label>
+                            <select class="form-select" id="asset_id" name="asset_id">
+                                <option value="">Keine Anlage zugeordnet</option>
+                                <?php foreach ($assets as $asset): ?>
+                                    <option value="<?= $asset['id'] ?>" <?= old('asset_id') == $asset['id'] ? 'selected' : '' ?>>
+                                        <?= esc($asset['name']) ?> (<?= esc($asset['asset_number']) ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="assigned_user_id" class="form-label">Zugewiesen an</label>
+                            <select class="form-select" id="assigned_user_id" name="assigned_user_id">
+                                <option value="">Noch nicht zugewiesen</option>
+                                <?php foreach ($users as $user): ?>
+                                    <option value="<?= $user['id'] ?>" <?= old('assigned_user_id') == $user['id'] ? 'selected' : '' ?>>
+                                        <?= esc($user['first_name'] . ' ' . $user['last_name']) ?> (<?= esc($user['username']) ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="estimated_duration" class="form-label">Geschätzte Dauer (Minuten)</label>
+                            <input type="number" class="form-control" id="estimated_duration" name="estimated_duration" 
+                                   value="<?= old('estimated_duration') ?>" min="1">
+                            <div class="form-text">Geschätzte Bearbeitungszeit in Minuten</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="scheduled_date" class="form-label">Geplantes Datum</label>
+                        <input type="datetime-local" class="form-control" id="scheduled_date" name="scheduled_date" 
+                               value="<?= old('scheduled_date') ?>">
+                        <div class="form-text">Wann soll der Arbeitsauftrag durchgeführt werden?</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="description" class="form-label">Beschreibung</label>
+                        <textarea class="form-control" id="description" name="description" rows="4"><?= old('description') ?></textarea>
+                        <div class="form-text">Detaillierte Beschreibung der durchzuführenden Arbeiten</div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="<?= base_url('work-orders') ?>" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Zurück
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Arbeitsauftrag erstellen
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script>
+// Auto-Ausfüllen basierend auf Priorität
+document.getElementById('priority').addEventListener('change', function() {
+    const priority = this.value;
+    const typeSelect = document.getElementById('type');
+    
+    if (priority === 'critical') {
+        typeSelect.value = 'emergency';
+    }
+});
+
+// Auto-Ausfüllen basierend auf Typ
+document.getElementById('type').addEventListener('change', function() {
+    const type = this.value;
+    const estimatedDuration = document.getElementById('estimated_duration');
+    
+    // Vorgeschlagene Dauern basierend auf Typ
+    const suggestions = {
+        'preventive': 120,
+        'corrective': 180,
+        'emergency': 240,
+        'inspection': 60
+    };
+    
+    if (suggestions[type] && !estimatedDuration.value) {
+        estimatedDuration.value = suggestions[type];
+    }
+});
+
+// Validierung vor Absenden
+document.querySelector('form').addEventListener('submit', function(e) {
+    const title = document.getElementById('title').value.trim();
+    const type = document.getElementById('type').value;
+    const priority = document.getElementById('priority').value;
+    
+    if (!title || !type || !priority) {
+        e.preventDefault();
+        alert('Bitte füllen Sie alle Pflichtfelder aus.');
+        return false;
+    }
+});
+</script>
+<?= $this->endSection() ?>
