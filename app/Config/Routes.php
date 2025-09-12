@@ -22,12 +22,13 @@ $routes->group('work-orders', function($routes) {
     $routes->post('(:num)', 'WorkOrders::update/$1'); // Für Formulare ohne PUT-Support
     $routes->delete('(:num)', 'WorkOrders::delete/$1');
     $routes->post('(:num)/status', 'WorkOrders::updateStatus/$1');
+    $routes->post('(:num)/components/(:num)/status', 'WorkOrders::updateComponentStatus/$1/$2');
 });
 
 // API Routes für AJAX
 $routes->get('/api/work-orders/search', 'WorkOrders::search');
 
-// Assets Routes (für später)
+// Assets Routes
 $routes->group('assets', function($routes) {
     $routes->get('', 'Assets::index');
     $routes->get('create', 'Assets::create');
@@ -37,6 +38,28 @@ $routes->group('assets', function($routes) {
     $routes->put('(:num)', 'Assets::update/$1');
     $routes->post('(:num)', 'Assets::update/$1');
     $routes->delete('(:num)', 'Assets::delete/$1');
+});
+
+// Preventive Maintenance Routes
+$routes->group('preventive-maintenance', function($routes) {
+    $routes->get('', 'PreventiveMaintenance::index');
+    $routes->get('create', 'PreventiveMaintenance::create');
+    $routes->post('', 'PreventiveMaintenance::store');
+    $routes->get('(:num)', 'PreventiveMaintenance::show/$1');
+    $routes->get('(:num)/edit', 'PreventiveMaintenance::edit/$1');
+    $routes->put('(:num)', 'PreventiveMaintenance::update/$1');
+    $routes->post('(:num)', 'PreventiveMaintenance::update/$1');
+    $routes->delete('(:num)', 'PreventiveMaintenance::delete/$1');
+    $routes->post('(:num)/complete', 'PreventiveMaintenance::markCompleted/$1');
+    $routes->post('generate-work-orders', 'PreventiveMaintenance::generateWorkOrders');
+    $routes->get('dashboard-widget', 'PreventiveMaintenance::dashboardWidget');
+});
+
+// API Routes für Preventive Maintenance
+$routes->group('api/preventive-maintenance', function($routes) {
+    $routes->get('overdue', 'PreventiveMaintenance::getOverdue');
+    $routes->get('upcoming/(:num)', 'PreventiveMaintenance::getUpcoming/$1');
+    $routes->get('stats', 'PreventiveMaintenance::getStats');
 });
 
 // Fallback

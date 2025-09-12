@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\WorkOrderModel;
 use App\Models\AssetModel;
 use App\Models\UserModel;
+use App\Models\WorkOrderComponentModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class WorkOrders extends BaseController
@@ -13,12 +14,14 @@ class WorkOrders extends BaseController
     protected $workOrderModel;
     protected $assetModel;
     protected $userModel;
+    protected $componentModel;
 
     public function __construct()
     {
         $this->workOrderModel = new WorkOrderModel();
         $this->assetModel = new AssetModel();
         $this->userModel = new UserModel();
+        $this->componentModel = new WorkOrderComponentModel();
     }
 
     public function index()
@@ -41,9 +44,15 @@ class WorkOrders extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Arbeitsauftrag nicht gefunden');
         }
 
+        // Load components
+        $components = $this->componentModel->getComponentsByWorkOrder($id);
+        $componentStats = $this->componentModel->getComponentStats($id);
+
         $data = [
             'page_title' => 'Arbeitsauftrag Details',
             'work_order' => $workOrder,
+            'components' => $components,
+            'component_stats' => $componentStats,
             'asset' => $workOrder['asset_id'] ? $this->assetModel->find($workOrder['asset_id']) : null,
             'assigned_user' => $workOrder['assigned_user_id'] ? $this->userModel->getUserSafe($workOrder['assigned_user_id']) : null,
             'created_by' => $this->userModel->getUserSafe($workOrder['created_by_user_id'])
@@ -222,6 +231,22 @@ class WorkOrders extends BaseController
             return $this->response->setJSON(['success' => true, 'message' => 'Status erfolgreich aktualisiert']);
         } else {
             return $this->response->setJSON(['success' => false, 'message' => 'Fehler beim Aktualisieren des Status']);
+        }
+    }
+
+    public function updateComponentStatus($workOrderId, $componentId)
+    {
+        $status = $this->request->getPost('status');
+        $component = $this->componentModel->find($componentId);
+        
+        if (!$component || $component['work_order_id'] != $workOrderId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Komponente nicht gefunden']);
+        }
+
+        if ($this->componentModel->updateComponentStatus($componentId, $status)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Komponentenstatus erfolgreich aktualisiert']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Fehler beim Aktualisieren des Komponentenstatus']);
         }
     }
 }

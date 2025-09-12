@@ -18,6 +18,81 @@
                 </div>
             </div>
             <div class="card-body">
+                <!-- KKS Komponenten Liste -->
+                <?php if (!empty($components)): ?>
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0">
+                                <i class="bi bi-list-check me-2"></i>
+                                KKS-Komponenten
+                            </h6>
+                            <div class="text-end">
+                                <small class="text-muted">
+                                    <?= $component_stats['completed'] ?> von <?= $component_stats['total'] ?> abgeschlossen
+                                    (<?= $component_stats['completion_percentage'] ?>%)
+                                </small>
+                                <div class="progress mt-1" style="height: 6px; width: 100px;">
+                                    <div class="progress-bar bg-success" 
+                                         style="width: <?= $component_stats['completion_percentage'] ?>%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="components-list border rounded p-3 bg-light">
+                            <?php foreach ($components as $index => $component): ?>
+                                <div class="component-item d-flex align-items-center justify-content-between py-2 <?= $index < count($components) - 1 ? 'border-bottom' : '' ?>">
+                                    <div class="component-info flex-grow-1">
+                                        <div class="d-flex align-items-center">
+                                            <span class="component-number me-3 text-muted fw-bold">
+                                                <?= $index + 1 ?>.
+                                            </span>
+                                            <div>
+                                                <div class="fw-medium">
+                                                    <?= esc($component['component_name']) ?>
+                                                </div>
+                                                <small class="text-muted">
+                                                    KKS: <?= esc($component['kks_number']) ?>
+                                                    <?php if (!empty($component['description'])): ?>
+                                                        - <?= esc($component['description']) ?>
+                                                    <?php endif; ?>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="component-status">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button type="button" 
+                                                    class="btn <?= $component['status'] === 'pending' ? 'btn-outline-secondary active' : 'btn-outline-secondary' ?>"
+                                                    onclick="updateComponentStatus(<?= $component['id'] ?>, 'pending')"
+                                                    title="Ausstehend">
+                                                <i class="bi bi-clock"></i>
+                                            </button>
+                                            <button type="button" 
+                                                    class="btn <?= $component['status'] === 'in_progress' ? 'btn-outline-primary active' : 'btn-outline-primary' ?>"
+                                                    onclick="updateComponentStatus(<?= $component['id'] ?>, 'in_progress')"
+                                                    title="In Bearbeitung">
+                                                <i class="bi bi-play-circle"></i>
+                                            </button>
+                                            <button type="button" 
+                                                    class="btn <?= $component['status'] === 'completed' ? 'btn-outline-success active' : 'btn-outline-success' ?>"
+                                                    onclick="updateComponentStatus(<?= $component['id'] ?>, 'completed')"
+                                                    title="Abgeschlossen">
+                                                <i class="bi bi-check-circle"></i>
+                                            </button>
+                                            <button type="button" 
+                                                    class="btn <?= $component['status'] === 'skipped' ? 'btn-outline-warning active' : 'btn-outline-warning' ?>"
+                                                    onclick="updateComponentStatus(<?= $component['id'] ?>, 'skipped')"
+                                                    title="Übersprungen">
+                                                <i class="bi bi-skip-forward"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <div class="row mb-3">
                     <div class="col-md-3">
                         <strong>Typ:</strong><br>
@@ -302,6 +377,53 @@
     margin-bottom: 5px;
     font-size: 0.85rem;
 }
+
+.components-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.component-item {
+    transition: background-color 0.2s ease;
+    border-radius: 4px;
+    margin: 0 -0.5rem;
+    padding: 0.5rem !important;
+}
+
+.component-item:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.component-number {
+    min-width: 2rem;
+    font-size: 0.9rem;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.75rem;
+}
+
+.btn-group .btn.active {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: white;
+}
+
+.btn-outline-success.active {
+    background-color: var(--bs-success);
+    border-color: var(--bs-success);
+}
+
+.btn-outline-warning.active {
+    background-color: var(--bs-warning);
+    border-color: var(--bs-warning);
+}
+
+.btn-outline-secondary.active {
+    background-color: var(--bs-secondary);
+    border-color: var(--bs-secondary);
+}
 </style>
 
 <script>
@@ -334,6 +456,35 @@ function updateStatus(newStatus) {
             alert('Ein Fehler ist aufgetreten');
         });
     }
+}
+
+function updateComponentStatus(componentId, newStatus) {
+    const statusTexts = {
+        'pending': 'auf ausstehend setzen',
+        'in_progress': 'in Bearbeitung setzen',
+        'completed': 'als abgeschlossen markieren',
+        'skipped': 'überspringen'
+    };
+    
+    fetch(`<?= base_url('work-orders/' . $work_order['id']) ?>/components/${componentId}/status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `status=${newStatus}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Fehler: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ein Fehler ist aufgetreten');
+    });
 }
 </script>
 <?= $this->endSection() ?>
