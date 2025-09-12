@@ -33,7 +33,7 @@ class WorkOrderModel extends Model
 
     // Validation
     protected $validationRules = [
-        'work_order_number' => 'required|max_length[100]|is_unique[work_orders.work_order_number,id,{id}]',
+        'work_order_number' => 'permit_empty|max_length[100]|is_unique[work_orders.work_order_number,id,{id}]',
         'title' => 'required|max_length[200]',
         'type' => 'required|in_list[preventive,corrective,emergency,inspection]',
         'status' => 'required|in_list[open,in_progress,completed,cancelled,on_hold]',
@@ -43,11 +43,19 @@ class WorkOrderModel extends Model
     
     protected $validationMessages = [
         'work_order_number' => [
-            'required' => 'Arbeitsauftragsnummer ist erforderlich',
             'is_unique' => 'Diese Arbeitsauftragsnummer ist bereits vergeben'
         ],
         'title' => [
             'required' => 'Titel ist erforderlich'
+        ],
+        'type' => [
+            'required' => 'Typ ist erforderlich'
+        ],
+        'priority' => [
+            'required' => 'Priorität ist erforderlich'
+        ],
+        'created_by_user_id' => [
+            'required' => 'Ersteller ist erforderlich'
         ]
     ];
     

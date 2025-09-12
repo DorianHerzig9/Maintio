@@ -93,10 +93,16 @@ class WorkOrders extends BaseController
             'estimated_duration' => $this->request->getPost('estimated_duration') ?: null
         ];
 
-        if ($this->workOrderModel->insert($data)) {
-            return redirect()->to('/work-orders')->with('success', 'Arbeitsauftrag erfolgreich erstellt');
-        } else {
-            return redirect()->back()->withInput()->with('error', 'Fehler beim Erstellen des Arbeitsauftrags');
+        try {
+            if ($this->workOrderModel->insert($data)) {
+                return redirect()->to('/work-orders')->with('success', 'Arbeitsauftrag erfolgreich erstellt');
+            } else {
+                $errors = $this->workOrderModel->errors();
+                return redirect()->back()->withInput()->with('errors', $errors);
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Error creating work order: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Fehler beim Erstellen des Arbeitsauftrags: ' . $e->getMessage());
         }
     }
 
