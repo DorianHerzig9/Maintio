@@ -35,7 +35,7 @@ class WorkOrderComponentModel extends Model
         'work_order_id' => 'required|integer',
         'kks_number' => 'required|max_length[100]',
         'component_name' => 'required|max_length[200]',
-        'status' => 'required|in_list[pending,in_progress,completed,skipped]',
+        'status' => 'permit_empty|in_list[pending,in_progress,completed,skipped]',
         'order_position' => 'permit_empty|integer'
     ];
     
@@ -81,19 +81,45 @@ class WorkOrderComponentModel extends Model
      */
     public function addComponentsToWorkOrder($workOrderId, $components)
     {
+        if (empty($components) || !is_array($components)) {
+            return true; // No components to add is not an error
+        }
+        
         $data = [];
         foreach ($components as $index => $component) {
-            $data[] = [
-                'work_order_id' => $workOrderId,
-                'kks_number' => $component['kks_number'],
-                'component_name' => $component['component_name'],
-                'description' => $component['description'] ?? null,
+            $componentData = [
+                'work_order_id' => (int) $workOrderId,
+                'kks_number' => trim($component['kks_number']),
+                'component_name' => trim($component['component_name']),
+                'description' => !empty($component['description']) ? trim($component['description']) : null,
                 'status' => 'pending',
                 'order_position' => $index + 1
             ];
+            
+            // Validate each component before adding to batch
+            if (empty($componentData['kks_number']) || empty($componentData['component_name'])) {
+                log_message('error', 'Invalid component data: ' . print_r($component, true));
+                continue;
+            }
+            
+            $data[] = $componentData;
         }
         
-        return $this->insertBatch($data);
+        if (empty($data)) {
+            log_message('warning', 'No valid components to insert');
+            return true; // No valid components is not an error
+        }
+        
+        try {
+            $result = $this->insertBatch($data);
+            if (!$result) {
+                log_message('error', 'insertBatch failed with errors: ' . print_r($this->errors(), true));
+            }
+            return $result;
+        } catch (\Exception $e) {
+            log_message('error', 'Exception in addComponentsToWorkOrder: ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**

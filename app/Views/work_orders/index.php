@@ -217,10 +217,17 @@ function deleteWorkOrder(workOrderId) {
         fetch(`<?= base_url('work-orders') ?>/${workOrderId}`, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 location.reload();
@@ -230,7 +237,7 @@ function deleteWorkOrder(workOrderId) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Ein Fehler ist aufgetreten');
+            alert('Ein Fehler ist aufgetreten: ' + error.message);
         });
     }
 }

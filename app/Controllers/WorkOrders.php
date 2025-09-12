@@ -106,6 +106,8 @@ class WorkOrders extends BaseController
             if ($workOrderId = $this->workOrderModel->insert($data)) {
                 // KKS-Komponenten hinzufügen, falls vorhanden
                 $components = $this->request->getPost('components');
+                log_message('debug', 'Components received: ' . print_r($components, true));
+                
                 if (!empty($components) && is_array($components)) {
                     $validComponents = [];
                     foreach ($components as $component) {
@@ -119,17 +121,22 @@ class WorkOrders extends BaseController
                     }
                     
                     if (!empty($validComponents)) {
-                        $this->componentModel->addComponentsToWorkOrder($workOrderId, $validComponents);
+                        log_message('debug', 'Adding components: ' . print_r($validComponents, true));
+                        $result = $this->componentModel->addComponentsToWorkOrder($workOrderId, $validComponents);
+                        if (!$result) {
+                            log_message('error', 'Failed to add components: ' . print_r($this->componentModel->errors(), true));
+                        }
                     }
                 }
                 
                 return redirect()->to('/work-orders')->with('success', 'Arbeitsauftrag erfolgreich erstellt');
             } else {
                 $errors = $this->workOrderModel->errors();
+                log_message('error', 'Work order creation failed: ' . print_r($errors, true));
                 return redirect()->back()->withInput()->with('errors', $errors);
             }
         } catch (\Exception $e) {
-            log_message('error', 'Error creating work order: ' . $e->getMessage());
+            log_message('error', 'Error creating work order: ' . $e->getMessage() . "\nTrace: " . $e->getTraceAsString());
             return redirect()->back()->withInput()->with('error', 'Fehler beim Erstellen des Arbeitsauftrags: ' . $e->getMessage());
         }
     }
@@ -210,27 +217,32 @@ class WorkOrders extends BaseController
         $workOrder = $this->workOrderModel->find($id);
         
         if (!$workOrder) {
-            if ($this->request->isAJAX()) {
-                return $this->response->setJSON(['success' => false, 'message' => 'Arbeitsauftrag nicht gefunden']);
+            if ($this->request->isAJAX() || $this->request->getHeaderLine('Accept') === 'application/json') {
+                return $this->response->setStatusCode(404)
+                                     ->setJSON(['success' => false, 'message' => 'Arbeitsauftrag nicht gefunden']);
             }
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Arbeitsauftrag nicht gefunden');
         }
 
         try {
             if ($this->workOrderModel->delete($id)) {
-                if ($this->request->isAJAX()) {
-                    return $this->response->setJSON(['success' => true, 'message' => 'Arbeitsauftrag erfolgreich gelöscht']);
+                if ($this->request->isAJAX() || $this->request->getHeaderLine('Accept') === 'application/json') {
+                    return $this->response->setStatusCode(200)
+                                         ->setJSON(['success' => true, 'message' => 'Arbeitsauftrag erfolgreich gelöscht']);
                 }
                 return redirect()->to('/work-orders')->with('success', 'Arbeitsauftrag erfolgreich gelöscht');
             } else {
-                if ($this->request->isAJAX()) {
-                    return $this->response->setJSON(['success' => false, 'message' => 'Fehler beim Löschen des Arbeitsauftrags']);
+                if ($this->request->isAJAX() || $this->request->getHeaderLine('Accept') === 'application/json') {
+                    return $this->response->setStatusCode(500)
+                                         ->setJSON(['success' => false, 'message' => 'Fehler beim Löschen des Arbeitsauftrags']);
                 }
                 return redirect()->to('/work-orders')->with('error', 'Fehler beim Löschen des Arbeitsauftrags');
             }
         } catch (\Exception $e) {
-            if ($this->request->isAJAX()) {
-                return $this->response->setJSON(['success' => false, 'message' => 'Fehler beim Löschen: ' . $e->getMessage()]);
+            log_message('error', 'Error deleting work order ' . $id . ': ' . $e->getMessage());
+            if ($this->request->isAJAX() || $this->request->getHeaderLine('Accept') === 'application/json') {
+                return $this->response->setStatusCode(500)
+                                     ->setJSON(['success' => false, 'message' => 'Fehler beim Löschen: ' . $e->getMessage()]);
             }
             return redirect()->to('/work-orders')->with('error', 'Fehler beim Löschen des Arbeitsauftrags');
         }

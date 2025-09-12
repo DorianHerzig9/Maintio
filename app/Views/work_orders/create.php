@@ -22,8 +22,14 @@
                         </ul>
                     </div>
                 <?php endif; ?>
+                
+                <?php if (session()->getFlashdata('error')): ?>
+                    <div class="alert alert-danger">
+                        <strong>Fehler:</strong> <?= esc(session()->getFlashdata('error')) ?>
+                    </div>
+                <?php endif; ?>
 
-                <form action="<?= base_url('work-orders') ?>" method="POST">
+                <form action="<?= base_url('work-orders') ?>" method="POST" id="work-order-form">
                     <?= csrf_field() ?>
                     
                     <div class="row">
@@ -128,12 +134,12 @@
                                             <div class="col-md-3">
                                                 <label class="form-label">KKS-Nummer</label>
                                                 <input type="text" class="form-control" name="components[INDEX][kks_number]" 
-                                                       placeholder="z.B. FBD-001" required>
+                                                       placeholder="z.B. FBD-001">
                                             </div>
                                             <div class="col-md-4">
                                                 <label class="form-label">Komponentenname</label>
                                                 <input type="text" class="form-control" name="components[INDEX][component_name]" 
-                                                       placeholder="z.B. Förderband Eingang" required>
+                                                       placeholder="z.B. Förderband Eingang">
                                             </div>
                                             <div class="col-md-5">
                                                 <label class="form-label">Beschreibung</label>
@@ -154,7 +160,7 @@
                         <a href="<?= base_url('work-orders') ?>" class="btn btn-secondary">
                             <i class="bi bi-arrow-left me-1"></i>Zurück
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" id="submit-btn">
                             <i class="bi bi-check-circle me-1"></i>Arbeitsauftrag erstellen
                         </button>
                     </div>
@@ -168,6 +174,8 @@
 
 <?= $this->section('scripts') ?>
 <script>
+console.log('Create form page loaded and ready');
+
 // Auto-Ausfüllen basierend auf Priorität
 document.getElementById('priority').addEventListener('change', function() {
     const priority = this.value;
@@ -196,44 +204,60 @@ document.getElementById('type').addEventListener('change', function() {
     }
 });
 
-// Validierung vor Absenden
-document.querySelector('form').addEventListener('submit', function(e) {
-    const title = document.getElementById('title').value.trim();
-    const type = document.getElementById('type').value;
-    const priority = document.getElementById('priority').value;
-    
-    if (!title || !type || !priority) {
-        e.preventDefault();
-        alert('Bitte füllen Sie alle Pflichtfelder aus.');
-        return false;
-    }
-});
-
 // KKS-Komponenten Management
 let componentIndex = 0;
 
 function addComponent() {
-    const template = document.getElementById('component-template').innerHTML;
-    const newComponent = template.replace(/INDEX/g, componentIndex);
+    const template = document.getElementById('component-template');
+    if (!template) {
+        console.error('Component template not found');
+        return;
+    }
+    
+    const templateContent = template.innerHTML;
+    const newComponent = templateContent.replace(/INDEX/g, componentIndex);
     
     const container = document.getElementById('components-container');
+    if (!container) {
+        console.error('Components container not found');
+        return;
+    }
+    
     const div = document.createElement('div');
     div.innerHTML = newComponent;
-    container.appendChild(div.firstElementChild);
+    
+    // Append the component
+    const componentElement = div.firstElementChild;
+    container.appendChild(componentElement);
     
     componentIndex++;
+    console.log('Added component with index:', componentIndex - 1);
 }
 
 function removeComponent(button) {
-    button.closest('.component-item').remove();
+    if (button && button.closest) {
+        button.closest('.component-item').remove();
+        console.log('Removed component');
+    }
 }
 
-// Füge initial eine Komponente hinzu, wenn noch keine vorhanden sind
+// Initialize page
 document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById('components-container');
-    if (container.children.length === 0) {
-        addComponent();
+    const form = document.getElementById('work-order-form');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    console.log('Form element found:', form);
+    console.log('Submit button found:', submitBtn);
+    
+    // Form submission logging (for debugging)
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('Form submitting...');
+            // Don't prevent submission - let it go through
+        });
     }
+    
+    console.log('Page initialized successfully');
 });
 </script>
 <?= $this->endSection() ?>
