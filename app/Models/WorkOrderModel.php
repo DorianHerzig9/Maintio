@@ -139,6 +139,34 @@ class WorkOrderModel extends Model
         
         return $stats;
     }
+
+    /**
+     * Get comprehensive work order statistics for dashboard
+     */
+    public function getWorkOrderStatistics()
+    {
+        // Status statistics
+        $statusStats = $this->select('status, COUNT(*) as count')
+                           ->groupBy('status')
+                           ->findAll();
+
+        // Priority statistics  
+        $priorityStats = $this->select('priority, COUNT(*) as count')
+                             ->groupBy('priority')
+                             ->findAll();
+
+        // Type statistics
+        $typeStats = $this->select('type, COUNT(*) as count')
+                         ->groupBy('type')
+                         ->findAll();
+
+        return [
+            'total' => $this->countAll(),
+            'by_status' => $statusStats,
+            'by_priority' => $priorityStats,
+            'by_type' => $typeStats
+        ];
+    }
     
     public function getByAssetId($assetId)
     {
