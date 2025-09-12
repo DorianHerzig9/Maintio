@@ -103,7 +103,26 @@ class WorkOrders extends BaseController
         ];
 
         try {
-            if ($this->workOrderModel->insert($data)) {
+            if ($workOrderId = $this->workOrderModel->insert($data)) {
+                // KKS-Komponenten hinzufügen, falls vorhanden
+                $components = $this->request->getPost('components');
+                if (!empty($components) && is_array($components)) {
+                    $validComponents = [];
+                    foreach ($components as $component) {
+                        if (!empty($component['kks_number']) && !empty($component['component_name'])) {
+                            $validComponents[] = [
+                                'kks_number' => trim($component['kks_number']),
+                                'component_name' => trim($component['component_name']),
+                                'description' => !empty($component['description']) ? trim($component['description']) : null
+                            ];
+                        }
+                    }
+                    
+                    if (!empty($validComponents)) {
+                        $this->componentModel->addComponentsToWorkOrder($workOrderId, $validComponents);
+                    }
+                }
+                
                 return redirect()->to('/work-orders')->with('success', 'Arbeitsauftrag erfolgreich erstellt');
             } else {
                 $errors = $this->workOrderModel->errors();
@@ -191,12 +210,28 @@ class WorkOrders extends BaseController
         $workOrder = $this->workOrderModel->find($id);
         
         if (!$workOrder) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Arbeitsauftrag nicht gefunden']);
+            }
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Arbeitsauftrag nicht gefunden');
         }
 
-        if ($this->workOrderModel->delete($id)) {
-            return redirect()->to('/work-orders')->with('success', 'Arbeitsauftrag erfolgreich gelöscht');
-        } else {
+        try {
+            if ($this->workOrderModel->delete($id)) {
+                if ($this->request->isAJAX()) {
+                    return $this->response->setJSON(['success' => true, 'message' => 'Arbeitsauftrag erfolgreich gelöscht']);
+                }
+                return redirect()->to('/work-orders')->with('success', 'Arbeitsauftrag erfolgreich gelöscht');
+            } else {
+                if ($this->request->isAJAX()) {
+                    return $this->response->setJSON(['success' => false, 'message' => 'Fehler beim Löschen des Arbeitsauftrags']);
+                }
+                return redirect()->to('/work-orders')->with('error', 'Fehler beim Löschen des Arbeitsauftrags');
+            }
+        } catch (\Exception $e) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Fehler beim Löschen: ' . $e->getMessage()]);
+            }
             return redirect()->to('/work-orders')->with('error', 'Fehler beim Löschen des Arbeitsauftrags');
         }
     }

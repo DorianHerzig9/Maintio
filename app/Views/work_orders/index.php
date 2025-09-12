@@ -143,6 +143,11 @@
                                                    class="btn btn-outline-secondary" title="Bearbeiten">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
+                                                <button class="btn btn-outline-danger" 
+                                                        onclick="deleteWorkOrder(<?= $order['id'] ?>)" 
+                                                        title="Löschen">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
                                                 <?php if ($order['status'] === 'open'): ?>
                                                     <button class="btn btn-outline-success" 
                                                             onclick="updateStatus(<?= $order['id'] ?>, 'in_progress')" 
@@ -198,6 +203,29 @@ function updateStatus(workOrderId, newStatus) {
                 location.reload();
             } else {
                 alert('Fehler: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ein Fehler ist aufgetreten');
+        });
+    }
+}
+
+function deleteWorkOrder(workOrderId) {
+    if (confirm('Möchten Sie diesen Arbeitsauftrag wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.')) {
+        fetch(`<?= base_url('work-orders') ?>/${workOrderId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Fehler: ' + (data.message || 'Arbeitsauftrag konnte nicht gelöscht werden'));
             }
         })
         .catch(error => {

@@ -105,6 +105,51 @@
                         <div class="form-text">Detaillierte Beschreibung der durchzuführenden Arbeiten</div>
                     </div>
 
+                    <!-- KKS-Komponenten -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <label class="form-label mb-0">KKS-Komponenten (Bauteile)</label>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addComponent()">
+                                <i class="bi bi-plus me-1"></i>Komponente hinzufügen
+                            </button>
+                        </div>
+                        <div class="form-text mb-3">Fügen Sie die zu bearbeitenden KKS-Komponenten hinzu. Diese können später während der Bearbeitung abgehakt werden.</div>
+                        
+                        <div id="components-container">
+                            <!-- Komponenten werden hier hinzugefügt -->
+                        </div>
+                        
+                        <!-- Template für neue Komponenten -->
+                        <div id="component-template" style="display: none;">
+                            <div class="component-item border rounded p-3 mb-2 bg-light">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <label class="form-label">KKS-Nummer</label>
+                                                <input type="text" class="form-control" name="components[INDEX][kks_number]" 
+                                                       placeholder="z.B. FBD-001" required>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Komponentenname</label>
+                                                <input type="text" class="form-control" name="components[INDEX][component_name]" 
+                                                       placeholder="z.B. Förderband Eingang" required>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <label class="form-label">Beschreibung</label>
+                                                <input type="text" class="form-control" name="components[INDEX][description]" 
+                                                       placeholder="z.B. Lager schmieren, Riemen prüfen">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-danger btn-sm ms-2" onclick="removeComponent(this)" title="Entfernen">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="d-flex justify-content-between">
                         <a href="<?= base_url('work-orders') ?>" class="btn btn-secondary">
                             <i class="bi bi-arrow-left me-1"></i>Zurück
@@ -161,6 +206,33 @@ document.querySelector('form').addEventListener('submit', function(e) {
         e.preventDefault();
         alert('Bitte füllen Sie alle Pflichtfelder aus.');
         return false;
+    }
+});
+
+// KKS-Komponenten Management
+let componentIndex = 0;
+
+function addComponent() {
+    const template = document.getElementById('component-template').innerHTML;
+    const newComponent = template.replace(/INDEX/g, componentIndex);
+    
+    const container = document.getElementById('components-container');
+    const div = document.createElement('div');
+    div.innerHTML = newComponent;
+    container.appendChild(div.firstElementChild);
+    
+    componentIndex++;
+}
+
+function removeComponent(button) {
+    button.closest('.component-item').remove();
+}
+
+// Füge initial eine Komponente hinzu, wenn noch keine vorhanden sind
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('components-container');
+    if (container.children.length === 0) {
+        addComponent();
     }
 });
 </script>
