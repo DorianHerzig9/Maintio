@@ -49,6 +49,13 @@
                             </div>
 
                             <div class="mb-3">
+                                <label for="asset_number" class="form-label">Anlagennummer <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="asset_number" name="asset_number" 
+                                       value="<?= esc($asset['asset_number']) ?>" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+
+                            <div class="mb-3">
                                 <label for="type" class="form-label">Typ <span class="text-danger">*</span></label>
                                 <select class="form-select" id="type" name="type" required>
                                     <option value="">Typ wählen...</option>
@@ -77,7 +84,7 @@
                                         Betriebsbereit
                                     </option>
                                     <option value="maintenance" <?= $asset['status'] === 'maintenance' ? 'selected' : '' ?>>
-                                        Wartung
+                                        Instandhaltung
                                     </option>
                                     <option value="out_of_order" <?= $asset['status'] === 'out_of_order' ? 'selected' : '' ?>>
                                         Außer Betrieb

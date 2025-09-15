@@ -13,7 +13,7 @@
                         <select class="form-select" id="status" name="status">
                             <option value="">Alle Status</option>
                             <option value="operational" <?= $status_filter === 'operational' ? 'selected' : '' ?>>Betriebsbereit</option>
-                            <option value="maintenance" <?= $status_filter === 'maintenance' ? 'selected' : '' ?>>Wartung</option>
+                            <option value="maintenance" <?= $status_filter === 'maintenance' ? 'selected' : '' ?>>Instandhaltung</option>
                             <option value="out_of_order" <?= $status_filter === 'out_of_order' ? 'selected' : '' ?>>Außer Betrieb</option>
                             <option value="decommissioned" <?= $status_filter === 'decommissioned' ? 'selected' : '' ?>>Stillgelegt</option>
                         </select>
@@ -252,7 +252,7 @@ function getAssetStatusColor($status) {
 function getAssetStatusText($status) {
     switch ($status) {
         case 'operational': return 'Betriebsbereit';
-        case 'maintenance': return 'Wartung';
+        case 'maintenance': return 'Instandhaltung';
         case 'out_of_order': return 'Außer Betrieb';
         case 'decommissioned': return 'Stillgelegt';
         default: return ucfirst($status);

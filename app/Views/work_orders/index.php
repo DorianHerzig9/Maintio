@@ -267,7 +267,7 @@ function getTypeColor($type) {
 
 function getTypeText($type) {
     switch ($type) {
-        case 'preventive': return 'Vorbeugend';
+        case 'preventive': return 'Instandhaltung';
         case 'corrective': return 'Korrektiv';
         case 'emergency': return 'Notfall';
         case 'inspection': return 'Inspektion';

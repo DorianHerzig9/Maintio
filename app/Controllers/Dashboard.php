@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\UserModel;
 use App\Models\AssetModel;
 use App\Models\WorkOrderModel;
+use App\Models\PreventiveMaintenanceModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class Dashboard extends BaseController
@@ -13,12 +14,14 @@ class Dashboard extends BaseController
     protected $userModel;
     protected $assetModel;
     protected $workOrderModel;
+    protected $pmModel;
 
     public function __construct()
     {
         $this->userModel = new UserModel();
         $this->assetModel = new AssetModel();
         $this->workOrderModel = new WorkOrderModel();
+        $this->pmModel = new PreventiveMaintenanceModel();
     }
 
     public function index()
@@ -29,7 +32,9 @@ class Dashboard extends BaseController
             'stats' => $this->getDashboardStats(),
             'recent_work_orders' => $this->getRecentWorkOrders(),
             'critical_assets' => $this->getCriticalAssets(),
-            'upcoming_tasks' => $this->getUpcomingTasks()
+            'upcoming_tasks' => $this->getUpcomingTasks(),
+            'upcoming_maintenance' => $this->pmModel->getUpcomingSchedules(14),
+            'overdue_maintenance' => $this->pmModel->getOverdueSchedules()
         ];
 
         return view('dashboard/index', $data);

@@ -329,7 +329,7 @@ function getAssetStatusColor($status) {
 function getAssetStatusText($status) {
     switch ($status) {
         case 'operational': return 'Betriebsbereit';
-        case 'maintenance': return 'Wartung';
+        case 'maintenance': return 'Instandhaltung';
         case 'out_of_order': return 'Außer Betrieb';
         case 'decommissioned': return 'Stillgelegt';
         default: return ucfirst($status);

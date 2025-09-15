@@ -67,7 +67,7 @@
                             <select class="form-select" id="status" name="status" required>
                                 <option value="">Status wählen...</option>
                                 <option value="operational" <?= old('status') === 'operational' ? 'selected' : '' ?>>Betriebsbereit</option>
-                                <option value="maintenance" <?= old('status') === 'maintenance' ? 'selected' : '' ?>>Wartung</option>
+                                <option value="maintenance" <?= old('status') === 'maintenance' ? 'selected' : '' ?>>Instandhaltung</option>
                                 <option value="out_of_order" <?= old('status') === 'out_of_order' ? 'selected' : '' ?>>Außer Betrieb</option>
                                 <option value="decommissioned" <?= old('status') === 'decommissioned' ? 'selected' : '' ?>>Stillgelegt</option>
                             </select>
@@ -115,6 +115,16 @@
                             <input type="date" class="form-control" id="installation_date" name="installation_date" 
                                    value="<?= old('installation_date') ?>">
                             <div class="form-text">Datum der ursprünglichen Installation</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="purchase_price" class="form-label">Anschaffungspreis (CHF)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">CHF</span>
+                                <input type="number" class="form-control" id="purchase_price" name="purchase_price" 
+                                       value="<?= old('purchase_price') ?>" step="0.01" min="0">
+                            </div>
+                            <div class="form-text">Ursprünglicher Kaufpreis der Anlage</div>
                         </div>
                     </div>
 

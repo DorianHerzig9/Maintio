@@ -50,7 +50,7 @@ class PreventiveMaintenanceModel extends Model
             'integer' => 'Ungültige Anlage'
         ],
         'schedule_name' => [
-            'required' => 'Name des Wartungsplans ist erforderlich'
+            'required' => 'Name des Instandhaltungsplans ist erforderlich'
         ],
         'interval_type' => [
             'required' => 'Intervalltyp ist erforderlich',

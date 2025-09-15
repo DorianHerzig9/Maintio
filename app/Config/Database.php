@@ -25,7 +25,7 @@ class Database extends Config
      * @var array<string, mixed>
      */
     public array $default = [
-        'database'    => WRITEPATH . 'maintio.db',
+        'database'    => WRITEPATH . 'database' . DIRECTORY_SEPARATOR . 'maintio.db',
         'DBDriver'    => 'SQLite3',
         'DBPrefix'    => '',
         'DBDebug'     => true,

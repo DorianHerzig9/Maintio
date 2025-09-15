@@ -61,6 +61,11 @@ class CreateAssetsTable extends Migration
                 'type' => 'DATE',
                 'null' => true,
             ],
+            'purchase_price' => [
+                'type'    => 'DECIMAL',
+                'constraint' => '15,2',
+                'null'    => true,
+            ],
             'description' => [
                 'type' => 'TEXT',
                 'null' => true,

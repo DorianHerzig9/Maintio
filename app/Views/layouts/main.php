@@ -87,6 +87,12 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
+                            <a class="nav-link <?= strpos(current_url(), 'preventive-maintenance') !== false ? 'active' : '' ?>" href="<?= base_url('preventive-maintenance') ?>">
+                                <i class="bi bi-calendar-check me-2"></i>
+                                Instandhaltung
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
                             <a class="nav-link" href="#">
                                 <i class="bi bi-bar-chart me-2"></i>
                                 Berichte

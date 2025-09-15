@@ -189,7 +189,7 @@
                         <div class="timeline-content">
                             <h6 class="timeline-title">Arbeitsauftrag erstellt</h6>
                             <p class="timeline-text">
-                                Erstellt von <strong><?= esc($created_by['first_name'] . ' ' . $created_by['last_name']) ?></strong>
+                                Erstellt von <strong><?= $created_by ? esc($created_by['first_name'] . ' ' . $created_by['last_name']) : 'Unbekannt' ?></strong>
                             </p>
                             <small class="text-muted"><?= date('d.m.Y H:i', strtotime($work_order['created_at'])) ?></small>
                         </div>
@@ -536,7 +536,7 @@ function getTypeColor($type) {
 
 function getTypeText($type) {
     switch ($type) {
-        case 'preventive': return 'Vorbeugend';
+        case 'preventive': return 'Instandhaltung';
         case 'corrective': return 'Korrektiv';
         case 'emergency': return 'Notfall';
         case 'inspection': return 'Inspektion';
@@ -577,7 +577,7 @@ function getAssetStatusColor($status) {
 function getAssetStatusText($status) {
     switch ($status) {
         case 'operational': return 'Betriebsbereit';
-        case 'maintenance': return 'Wartung';
+        case 'maintenance': return 'Instandhaltung';
         case 'out_of_order': return 'Außer Betrieb';
         case 'decommissioned': return 'Stillgelegt';
         default: return ucfirst($status);

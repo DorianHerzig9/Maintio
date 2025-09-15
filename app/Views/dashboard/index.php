@@ -145,9 +145,9 @@
 </div>
 
 <!-- Recent Activities -->
-<div class="row">
+<div class="row mb-4">
     <!-- Recent Work Orders -->
-    <div class="col-xl-6 col-lg-6">
+    <div class="col-xl-4 col-lg-4">
         <div class="card">
             <div class="card-header">
                 <h5 class="card-title mb-0">
@@ -192,7 +192,7 @@
     </div>
 
     <!-- Critical Assets -->
-    <div class="col-xl-6 col-lg-6">
+    <div class="col-xl-4 col-lg-4">
         <div class="card">
             <div class="card-header">
                 <h5 class="card-title mb-0">
@@ -230,6 +230,15 @@
             </div>
         </div>
     </div>
+
+    <!-- Preventive Maintenance Widget -->
+    <?php 
+    $preventive_maintenance_data = [
+        'upcoming_maintenance' => $upcoming_maintenance,
+        'overdue_maintenance' => $overdue_maintenance
+    ];
+    echo view('preventive_maintenance/dashboard_widget', $preventive_maintenance_data);
+    ?>
 </div>
 
 <?= $this->endSection() ?>
@@ -349,7 +358,7 @@ function getStatusText($status) {
 function getAssetStatusText($status) {
     switch ($status) {
         case 'operational': return 'Betriebsbereit';
-        case 'maintenance': return 'Wartung';
+        case 'maintenance': return 'Instandhaltung';
         case 'out_of_order': return 'Außer Betrieb';
         case 'decommissioned': return 'Stillgelegt';
         default: return ucfirst($status);
