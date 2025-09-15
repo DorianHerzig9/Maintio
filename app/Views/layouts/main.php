@@ -52,6 +52,24 @@
             font-weight: 700;
             font-size: 1.5rem;
         }
+        .avatar-sm {
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+        }
+        .avatar-lg {
+            width: 64px;
+            height: 64px;
+            font-size: 24px;
+        }
+        .btn-group .btn {
+            margin: 0;
+        }
+        .table th {
+            background-color: #f8f9fa;
+            border-top: none;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -93,19 +111,19 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link <?= strpos(current_url(), 'reports') !== false ? 'active' : '' ?>" href="<?= base_url('reports') ?>">
                                 <i class="bi bi-bar-chart me-2"></i>
                                 Berichte
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link <?= strpos(current_url(), 'users') !== false ? 'active' : '' ?>" href="<?= base_url('users') ?>">
                                 <i class="bi bi-people me-2"></i>
                                 Benutzer
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link <?= strpos(current_url(), 'settings') !== false ? 'active' : '' ?>" href="<?= base_url('settings') ?>">
                                 <i class="bi bi-gear me-2"></i>
                                 Einstellungen
                             </a>

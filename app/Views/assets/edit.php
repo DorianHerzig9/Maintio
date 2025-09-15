@@ -42,7 +42,7 @@
                         <!-- Grunddaten -->
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+                                <label for="name" class="form-label">Anlagenname <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="name" name="name" 
                                        value="<?= esc($asset['name']) ?>" required>
                                 <div class="invalid-feedback"></div>
@@ -56,13 +56,13 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="type" class="form-label">Typ <span class="text-danger">*</span></label>
+                                <label for="type" class="form-label">Anlagentyp <span class="text-danger">*</span></label>
                                 <select class="form-select" id="type" name="type" required>
                                     <option value="">Typ wählen...</option>
                                     <option value="Maschine" <?= $asset['type'] === 'Maschine' ? 'selected' : '' ?>>Maschine</option>
                                     <option value="Fahrzeug" <?= $asset['type'] === 'Fahrzeug' ? 'selected' : '' ?>>Fahrzeug</option>
                                     <option value="Gebäude" <?= $asset['type'] === 'Gebäude' ? 'selected' : '' ?>>Gebäude</option>
-                                    <option value="IT-Equipment" <?= $asset['type'] === 'IT-Equipment' ? 'selected' : '' ?>>IT-Equipment</option>
+                                    <option value="IT-Equipment" <?= $asset['type'] === 'IT-Equipment' ? 'selected' : '' ?>>IT-Gerät</option>
                                     <option value="Werkzeug" <?= $asset['type'] === 'Werkzeug' ? 'selected' : '' ?>>Werkzeug</option>
                                     <option value="Infrastruktur" <?= $asset['type'] === 'Infrastruktur' ? 'selected' : '' ?>>Infrastruktur</option>
                                     <option value="Sonstiges" <?= $asset['type'] === 'Sonstiges' ? 'selected' : '' ?>>Sonstiges</option>
@@ -78,13 +78,13 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                                <label for="status" class="form-label">Anlagenstatus <span class="text-danger">*</span></label>
                                 <select class="form-select" id="status" name="status" required>
                                     <option value="operational" <?= $asset['status'] === 'operational' ? 'selected' : '' ?>>
                                         Betriebsbereit
                                     </option>
                                     <option value="maintenance" <?= $asset['status'] === 'maintenance' ? 'selected' : '' ?>>
-                                        Instandhaltung
+                                        Wartung
                                     </option>
                                     <option value="out_of_order" <?= $asset['status'] === 'out_of_order' ? 'selected' : '' ?>>
                                         Außer Betrieb
@@ -139,7 +139,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="purchase_price" class="form-label">Anschaffungspreis (CHF)</label>
+                                <label for="purchase_price" class="form-label">Anschaffungspreis</label>
                                 <div class="input-group">
                                     <span class="input-group-text">CHF</span>
                                     <input type="number" class="form-control" id="purchase_price" name="purchase_price" 
@@ -154,7 +154,7 @@
                     <div class="mb-3">
                         <label for="description" class="form-label">Beschreibung</label>
                         <textarea class="form-control" id="description" name="description" rows="4" 
-                                  placeholder="Detaillierte Beschreibung der Anlage..."><?= esc($asset['description']) ?></textarea>
+                                  placeholder="Detaillierte Beschreibung der Anlage"><?= esc($asset['description']) ?></textarea>
                         <div class="invalid-feedback"></div>
                     </div>
 
@@ -215,19 +215,19 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Name validation
             if (control.id === 'name' && control.value.trim().length < 2) {
-                showError(control, 'Name muss mindestens 2 Zeichen lang sein.');
+                showError(control, 'Der Name muss mindestens 2 Zeichen lang sein.');
                 isValid = false;
             }
             
             // Location validation
             if (control.id === 'location' && control.value.trim().length < 2) {
-                showError(control, 'Standort muss mindestens 2 Zeichen lang sein.');
+                showError(control, 'Der Standort muss mindestens 2 Zeichen lang sein.');
                 isValid = false;
             }
             
             // Price validation
             if (control.id === 'purchase_price' && control.value && parseFloat(control.value) < 0) {
-                showError(control, 'Preis kann nicht negativ sein.');
+                showError(control, 'Der Preis darf nicht negativ sein.');
                 isValid = false;
             }
             
@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const today = new Date();
                 
                 if (installDate > today) {
-                    showError(control, 'Installationsdatum kann nicht in der Zukunft liegen.');
+                    showError(control, 'Das Installationsdatum darf nicht in der Zukunft liegen.');
                     isValid = false;
                 }
             }
@@ -266,7 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function confirmDelete() {
-    if (confirm('Möchten Sie diese Anlage wirklich löschen?\n\nHinweis: Diese Aktion kann nicht rückgängig gemacht werden.')) {
+    if (confirm('Sind Sie sicher, dass Sie diese Anlage löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.')) {
         // Erstelle und sende DELETE-Request
         const form = document.createElement('form');
         form.method = 'POST';

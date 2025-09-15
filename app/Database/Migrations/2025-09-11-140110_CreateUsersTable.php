@@ -25,7 +25,7 @@ class CreateUsersTable extends Migration
                 'constraint' => 150,
                 'unique'     => true,
             ],
-            'password' => [
+            'password_hash' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 255,
             ],
@@ -40,14 +40,36 @@ class CreateUsersTable extends Migration
             'role' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 50,
-                'default'    => 'benutzer',
+                'default'    => 'viewer',
             ],
-            'status' => [
+            'department' => [
                 'type'       => 'VARCHAR',
-                'constraint' => 50,
-                'default'    => 'active',
+                'constraint' => 100,
+                'null'       => true,
+            ],
+            'phone' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 20,
+                'null'       => true,
+            ],
+            'is_active' => [
+                'type'       => 'BOOLEAN',
+                'default'    => true,
+            ],
+            'avatar' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 255,
+                'null'       => true,
+            ],
+            'preferences' => [
+                'type' => 'TEXT',
+                'null' => true,
             ],
             'last_login' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
+            'deleted_at' => [
                 'type' => 'DATETIME',
                 'null' => true,
             ],

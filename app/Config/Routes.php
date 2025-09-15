@@ -62,5 +62,38 @@ $routes->group('api/preventive-maintenance', function($routes) {
     $routes->get('stats', 'PreventiveMaintenance::getStats');
 });
 
+// Users Routes
+$routes->group('users', function($routes) {
+    $routes->get('', 'Users::index');
+    $routes->get('create', 'Users::create');
+    $routes->post('', 'Users::store');
+    $routes->get('(:num)', 'Users::show/$1');
+    $routes->get('(:num)/edit', 'Users::edit/$1');
+    $routes->put('(:num)', 'Users::update/$1');
+    $routes->post('(:num)', 'Users::update/$1'); // Für Formulare ohne PUT-Support
+    $routes->delete('(:num)', 'Users::delete/$1');
+    $routes->post('(:num)/toggle-status', 'Users::toggleStatus/$1');
+});
+
+// Reports Routes
+$routes->group('reports', function($routes) {
+    $routes->get('', 'Reports::index');
+    $routes->get('work-orders', 'Reports::workOrders');
+    $routes->get('assets', 'Reports::assets');
+    $routes->get('maintenance', 'Reports::maintenance');
+    $routes->get('performance', 'Reports::performance');
+    $routes->get('export-work-orders', 'Reports::exportWorkOrders');
+    $routes->get('export-assets', 'Reports::exportAssets');
+});
+
+// Settings Routes
+$routes->group('settings', function($routes) {
+    $routes->get('', 'Settings::index');
+    $routes->post('', 'Settings::update');
+    $routes->get('profile', 'Settings::profile');
+    $routes->get('backup', 'Settings::backup');
+    $routes->get('logs', 'Settings::logs');
+});
+
 // Fallback
 $routes->get('/home', 'Home::index');

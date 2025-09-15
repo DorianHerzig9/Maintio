@@ -9,11 +9,11 @@
             <div class="card-body">
                 <form method="GET" class="row g-3">
                     <div class="col-md-3">
-                        <label for="status" class="form-label">Status</label>
+                        <label for="status" class="form-label">Anlagenstatus</label>
                         <select class="form-select" id="status" name="status">
                             <option value="">Alle Status</option>
                             <option value="operational" <?= $status_filter === 'operational' ? 'selected' : '' ?>>Betriebsbereit</option>
-                            <option value="maintenance" <?= $status_filter === 'maintenance' ? 'selected' : '' ?>>Instandhaltung</option>
+                            <option value="maintenance" <?= $status_filter === 'maintenance' ? 'selected' : '' ?>>Wartung</option>
                             <option value="out_of_order" <?= $status_filter === 'out_of_order' ? 'selected' : '' ?>>Außer Betrieb</option>
                             <option value="decommissioned" <?= $status_filter === 'decommissioned' ? 'selected' : '' ?>>Stillgelegt</option>
                         </select>
@@ -29,14 +29,14 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label for="search" class="form-label">Suche</label>
-                        <input type="text" class="form-control" id="search" placeholder="Name, Nummer, Typ, Standort...">
+                        <label for="search" class="form-label">Suchen</label>
+                        <input type="text" class="form-control" id="search" placeholder="Nach Anlagen suchen...">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">&nbsp;</label>
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-search me-1"></i>Filtern
+                                <i class="bi bi-search me-1"></i>Filter
                             </button>
                         </div>
                     </div>
@@ -77,11 +77,11 @@
                     <div class="card-body">
                         <div class="row mb-2">
                             <div class="col-6">
-                                <small class="text-muted">Nummer:</small><br>
+                                <small class="text-muted">Anlagennummer:</small><br>
                                 <strong><?= esc($asset['asset_number']) ?></strong>
                             </div>
                             <div class="col-6">
-                                <small class="text-muted">Typ:</small><br>
+                                <small class="text-muted">Anlagentyp:</small><br>
                                 <?= esc($asset['type']) ?>
                             </div>
                         </div>
@@ -102,7 +102,7 @@
                             </div>
                             <?php if ($asset['installation_date']): ?>
                                 <div class="col-6">
-                                    <small class="text-muted">Installation:</small><br>
+                                    <small class="text-muted">Installationsdatum:</small><br>
                                     <?= date('d.m.Y', strtotime($asset['installation_date'])) ?>
                                 </div>
                             <?php endif; ?>
@@ -157,7 +157,7 @@
                 <div class="card-body text-center py-5">
                     <i class="bi bi-cpu display-1 text-muted"></i>
                     <h5 class="mt-3">Keine Anlagen gefunden</h5>
-                    <p class="text-muted">Erstellen Sie Ihre erste Anlage oder passen Sie die Filter an.</p>
+                    <p class="text-muted">Erstellen Sie die erste Anlage oder passen Sie die Filter an.</p>
                     <a href="<?= base_url('assets/create') ?>" class="btn btn-primary">
                         <i class="bi bi-plus-circle me-1"></i>
                         Anlage erstellen
@@ -187,7 +187,7 @@
                         ?>
                         
                         <div class="col-md-3">
-                            <h6>Status</h6>
+                            <h6>Anlagenstatus</h6>
                             <?php foreach ($statusCounts as $status => $count): ?>
                                 <span class="badge bg-<?= getAssetStatusColor($status) ?> me-1">
                                     <?= getAssetStatusText($status) ?>: <?= $count ?>
@@ -210,7 +210,7 @@
                         </div>
                         
                         <div class="col-md-3">
-                            <h6>Kritische</h6>
+                            <h6>Kritisch</h6>
                             <span class="badge bg-danger fs-6">
                                 <?= $priorityCounts['critical'] ?? 0 ?> Kritisch
                             </span>
@@ -230,7 +230,7 @@
 document.getElementById('search').addEventListener('input', function() {
     const query = this.value;
     if (query.length > 2) {
-        // Hier könnte eine AJAX-Suche implementiert werden
+        // AJAX-Suche könnte hier implementiert werden
         console.log('Suche nach:', query);
     }
 });
@@ -252,7 +252,7 @@ function getAssetStatusColor($status) {
 function getAssetStatusText($status) {
     switch ($status) {
         case 'operational': return 'Betriebsbereit';
-        case 'maintenance': return 'Instandhaltung';
+        case 'maintenance': return 'Wartung';
         case 'out_of_order': return 'Außer Betrieb';
         case 'decommissioned': return 'Stillgelegt';
         default: return ucfirst($status);
