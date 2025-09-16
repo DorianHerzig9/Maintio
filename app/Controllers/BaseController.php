@@ -35,13 +35,13 @@ abstract class BaseController extends Controller
      *
      * @var list<string>
      */
-    protected $helpers = [];
+    protected $helpers = ['form', 'url'];
 
     /**
      * Be sure to declare properties for any property fetch you initialized.
      * The creation of dynamic property is deprecated in PHP 8.2.
      */
-    // protected $session;
+    protected $session;
 
     /**
      * @return void
@@ -52,7 +52,111 @@ abstract class BaseController extends Controller
         parent::initController($request, $response, $logger);
 
         // Preload any models, libraries, etc, here.
+        $this->session = service('session');
 
-        // E.g.: $this->session = service('session');
+        // Enable CSRF protection
+        helper('security');
+    }
+
+    /**
+     * Check if user is authenticated
+     */
+    protected function isAuthenticated(): bool
+    {
+        return (bool) $this->session->get('user_id');
+    }
+
+    /**
+     * Get current user ID
+     */
+    protected function getCurrentUserId(): ?int
+    {
+        return $this->session->get('user_id');
+    }
+
+    /**
+     * Get current user data
+     */
+    protected function getCurrentUser(): ?array
+    {
+        return $this->session->get('user_data');
+    }
+
+    /**
+     * Require authentication for this controller method
+     */
+    protected function requireAuth(): void
+    {
+        if (!$this->isAuthenticated()) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Access denied');
+        }
+    }
+
+    /**
+     * Check user role permissions
+     */
+    protected function hasRole(string $role): bool
+    {
+        $userData = $this->getCurrentUser();
+        return $userData && $userData['role'] === $role;
+    }
+
+    /**
+     * Check if user has any of the specified roles
+     */
+    protected function hasAnyRole(array $roles): bool
+    {
+        $userData = $this->getCurrentUser();
+        return $userData && in_array($userData['role'], $roles);
+    }
+
+    /**
+     * Log user activity with context
+     */
+    protected function logActivity(string $action, array $data = []): void
+    {
+        $userId = $this->getCurrentUserId();
+        $userAgent = $this->request->getUserAgent();
+        $ipAddress = $this->request->getIPAddress();
+
+        $logData = array_merge($data, [
+            'user_id' => $userId,
+            'action' => $action,
+            'ip_address' => $ipAddress,
+            'user_agent' => $userAgent->__toString(),
+            'timestamp' => date('Y-m-d H:i:s'),
+            'url' => current_url()
+        ]);
+
+        log_message('info', 'User Activity: ' . json_encode($logData));
+    }
+
+    /**
+     * Handle errors with proper logging and user feedback
+     */
+    protected function handleError(\Exception $e, string $userMessage = 'Ein Fehler ist aufgetreten', bool $redirect = true)
+    {
+        // Log detailed error for debugging
+        log_message('error', 'Controller Error: ' . $e->getMessage() . "\nFile: " . $e->getFile() . "\nLine: " . $e->getLine() . "\nTrace: " . $e->getTraceAsString());
+
+        // Log user context
+        $this->logActivity('error_encountered', [
+            'error_message' => $e->getMessage(),
+            'error_file' => $e->getFile(),
+            'error_line' => $e->getLine()
+        ]);
+
+        if ($this->request->isAJAX()) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'success' => false,
+                'message' => $userMessage
+            ]);
+        }
+
+        if ($redirect) {
+            return redirect()->back()->with('error', $userMessage);
+        }
+
+        throw $e;
     }
 }

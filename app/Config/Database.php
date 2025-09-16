@@ -28,7 +28,7 @@ class Database extends Config
         'database'    => WRITEPATH . 'database' . DIRECTORY_SEPARATOR . 'maintio.db',
         'DBDriver'    => 'SQLite3',
         'DBPrefix'    => '',
-        'DBDebug'     => true,
+        'DBDebug'     => ENVIRONMENT === 'development',
         'swapPre'     => '',
         'failover'    => [],
         'foreignKeys' => true,

@@ -7,6 +7,18 @@ use CodeIgniter\Config\BaseConfig;
 class App extends BaseConfig
 {
     /**
+     * -----    /**
+     * If $negotiateLocale is true, this array lists the locales supported
+     * by the application in descending order of priority. If no match is
+     * found, the first locale will be used.
+     *
+     * IncomingRequest::setLocale() also uses this list.
+     *
+     * @var list<string>
+     */
+    public array $supportedLocales = ['en'];
+
+    /**
      * --------------------------------------------------------------------------
      * Base Site URL
      * --------------------------------------------------------------------------
@@ -120,7 +132,6 @@ class App extends BaseConfig
      *
      * @var list<string>
      */
-    public array $supportedLocales = ['en'];
 
     /**
      * --------------------------------------------------------------------------

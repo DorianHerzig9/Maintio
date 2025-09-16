@@ -24,8 +24,8 @@ class UserModel extends Model
     protected array $casts = [
         'id' => 'integer',
         'is_active' => 'boolean',
-        'last_login' => 'datetime',
-        'preferences' => 'json'
+        'last_login' => '?datetime',
+        'preferences' => '?json'
     ];
     protected array $castHandlers = [];
 
@@ -42,6 +42,7 @@ class UserModel extends Model
         'email' => 'required|valid_email|is_unique[users.email,id,{id}]',
         'first_name' => 'required|alpha_space|max_length[100]',
         'last_name' => 'required|alpha_space|max_length[100]',
+        'password' => 'required|min_length[6]',
         'password_hash' => 'permit_empty',
         'role' => 'required|in_list[admin,manager,technician,viewer]',
         'department' => 'permit_empty|max_length[100]',
@@ -65,6 +66,10 @@ class UserModel extends Model
         ],
         'last_name' => [
             'required' => 'Nachname ist erforderlich'
+        ],
+        'password' => [
+            'required' => 'Passwort ist erforderlich',
+            'min_length' => 'Passwort muss mindestens 6 Zeichen lang sein'
         ],
         'role' => [
             'required' => 'Rolle ist erforderlich'
@@ -93,6 +98,11 @@ class UserModel extends Model
         if (isset($data['data']['password']) && !empty($data['data']['password'])) {
             $data['data']['password_hash'] = password_hash($data['data']['password'], PASSWORD_DEFAULT);
             unset($data['data']['password']);
+        } elseif (!isset($data['data']['password_hash']) || empty($data['data']['password_hash'])) {
+            // Ensure password_hash is never empty for new users
+            if (!isset($data['data']['id'])) {
+                throw new \InvalidArgumentException('Passwort ist erforderlich');
+            }
         }
         return $data;
     }
@@ -104,10 +114,10 @@ class UserModel extends Model
     {
         return $this->select('users.*,
                             CASE
-                                WHEN role = "admin" THEN "Administrator"
-                                WHEN role = "manager" THEN "Manager"
-                                WHEN role = "technician" THEN "Techniker"
-                                WHEN role = "viewer" THEN "Betrachter"
+                                WHEN role = \'admin\' THEN \'Administrator\'
+                                WHEN role = \'manager\' THEN \'Manager\'
+                                WHEN role = \'technician\' THEN \'Techniker\'
+                                WHEN role = \'viewer\' THEN \'Betrachter\'
                                 ELSE role
                             END as role_name')
                     ->where('deleted_at', null)
@@ -132,7 +142,10 @@ class UserModel extends Model
      */
     public function updateLastLogin($userId)
     {
-        return $this->update($userId, ['last_login' => date('Y-m-d H:i:s')]);
+        if ($userId) {
+            return $this->update($userId, ['last_login' => date('Y-m-d H:i:s')]);
+        }
+        return false;
     }
 
     /**
@@ -160,24 +173,35 @@ class UserModel extends Model
     }
 
     /**
-     * Get user statistics
+     * Get user statistics optimized with single query
      */
     public function getUserStats()
     {
-        $total = $this->where('deleted_at', null)->countAllResults();
-        $active = $this->where('is_active', 1)->where('deleted_at', null)->countAllResults();
-        $inactive = $total - $active;
+        $db = \Config\Database::connect();
 
-        $roles = $this->select('role, COUNT(*) as count')
-                      ->where('deleted_at', null)
-                      ->groupBy('role')
-                      ->findAll();
+        $query = "SELECT
+                    COUNT(*) as total,
+                    SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active,
+                    SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END) as inactive,
+                    SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) as admin_count,
+                    SUM(CASE WHEN role = 'manager' THEN 1 ELSE 0 END) as manager_count,
+                    SUM(CASE WHEN role = 'technician' THEN 1 ELSE 0 END) as technician_count,
+                    SUM(CASE WHEN role = 'viewer' THEN 1 ELSE 0 END) as viewer_count
+                  FROM {$this->table}
+                  WHERE deleted_at IS NULL";
+
+        $result = $db->query($query)->getRowArray();
 
         return [
-            'total' => $total,
-            'active' => $active,
-            'inactive' => $inactive,
-            'roles' => $roles
+            'total' => (int) $result['total'],
+            'active' => (int) $result['active'],
+            'inactive' => (int) $result['inactive'],
+            'roles' => [
+                ['role' => 'admin', 'count' => (int) $result['admin_count']],
+                ['role' => 'manager', 'count' => (int) $result['manager_count']],
+                ['role' => 'technician', 'count' => (int) $result['technician_count']],
+                ['role' => 'viewer', 'count' => (int) $result['viewer_count']]
+            ]
         ];
     }
 
@@ -187,5 +211,16 @@ class UserModel extends Model
     public function verifyPassword($password, $hash)
     {
         return password_verify($password, $hash);
+    }
+
+    /**
+     * Get user safely without sensitive data like password hash
+     */
+    public function getUserSafe($userId)
+    {
+        return $this->select('id, username, first_name, last_name, email, role, department, phone, is_active, created_at, updated_at')
+                    ->where('id', $userId)
+                    ->where('deleted_at', null)
+                    ->first();
     }
 }

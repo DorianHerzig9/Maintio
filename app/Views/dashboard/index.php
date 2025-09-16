@@ -10,7 +10,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <div class="h5 mb-0"><?= $stats['total_work_orders'] ?></div>
-                        <div class="small"><?= lang('App.total_work_orders') ?></div>
+                        <div class="small">Arbeitsaufträge gesamt</div>
                     </div>
                     <div class="align-self-center">
                         <i class="bi bi-clipboard-check display-6"></i>
@@ -26,7 +26,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <div class="h5 mb-0"><?= $stats['open_work_orders'] ?></div>
-                        <div class="small"><?= lang('App.open_orders') ?></div>
+                        <div class="small">Offene Aufträge</div>
                     </div>
                     <div class="align-self-center">
                         <i class="bi bi-exclamation-triangle display-6"></i>
@@ -42,7 +42,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <div class="h5 mb-0"><?= $stats['completion_rate'] ?>%</div>
-                        <div class="small"><?= lang('App.completion_rate') ?></div>
+                        <div class="small">Abschlussrate</div>
                     </div>
                     <div class="align-self-center">
                         <i class="bi bi-check-circle display-6"></i>
@@ -58,7 +58,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <div class="h5 mb-0"><?= $stats['critical_work_orders'] ?></div>
-                        <div class="small"><?= lang('App.critical_orders') ?></div>
+                        <div class="small">Kritische Aufträge</div>
                     </div>
                     <div class="align-self-center">
                         <i class="bi bi-exclamation-circle display-6"></i>
@@ -77,7 +77,7 @@
             <div class="card-header">
                 <h5 class="card-title mb-0">
                     <i class="bi bi-pie-chart me-2"></i>
-                    <?= lang('App.work_orders_by_status') ?>
+                    Arbeitsaufträge nach Status
                 </h5>
             </div>
             <div class="card-body">
@@ -92,7 +92,7 @@
             <div class="card-header">
                 <h5 class="card-title mb-0">
                     <i class="bi bi-bar-chart me-2"></i>
-                    <?= lang('App.assets_by_status') ?>
+                    Anlagen nach Status
                 </h5>
             </div>
             <div class="card-body">
@@ -109,7 +109,7 @@
             <div class="card-header">
                 <h5 class="card-title mb-0">
                     <i class="bi bi-lightning me-2"></i>
-                    <?= lang('App.quick_actions') ?>
+                    Schnellaktionen
                 </h5>
             </div>
             <div class="card-body">
@@ -117,25 +117,25 @@
                     <div class="col-md-3 mb-2">
                         <a href="<?= base_url('work-orders/create') ?>" class="btn btn-primary w-100">
                             <i class="bi bi-plus-circle me-2"></i>
-                            <?= lang('App.new_work_order') ?>
+                            Neuer Arbeitsauftrag
                         </a>
                     </div>
                     <div class="col-md-3 mb-2">
                         <a href="<?= base_url('assets/create') ?>" class="btn btn-success w-100">
                             <i class="bi bi-plus-square me-2"></i>
-                            <?= lang('App.new_asset') ?>
+                            Neue Anlage
                         </a>
                     </div>
                     <div class="col-md-3 mb-2">
                         <button class="btn btn-info w-100" onclick="refreshDashboard()">
                             <i class="bi bi-arrow-clockwise me-2"></i>
-                            <?= lang('App.refresh_dashboard') ?>
+                            Dashboard aktualisieren
                         </button>
                     </div>
                     <div class="col-md-3 mb-2">
                         <a href="#" class="btn btn-warning w-100">
                             <i class="bi bi-file-earmark-text me-2"></i>
-                            <?= lang('App.create_report') ?>
+                            Bericht erstellen
                         </a>
                     </div>
                 </div>
@@ -152,7 +152,7 @@
             <div class="card-header">
                 <h5 class="card-title mb-0">
                     <i class="bi bi-clock-history me-2"></i>
-                    <?= lang('App.recent_work_orders') ?>
+                    Aktuelle Arbeitsaufträge
                 </h5>
             </div>
             <div class="card-body">
@@ -175,15 +175,15 @@
                     </div>
                     <div class="text-center mt-3">
                         <a href="<?= base_url('work-orders') ?>" class="btn btn-outline-primary btn-sm">
-                            <?= lang('App.show_all') ?>
+                            Alle anzeigen
                         </a>
                     </div>
                 <?php else: ?>
                     <div class="text-center text-muted py-4">
                         <i class="bi bi-inbox display-6"></i>
-                        <p class="mt-2"><?= lang('App.no_work_orders_yet') ?></p>
+                        <p class="mt-2">Noch keine Arbeitsaufträge vorhanden</p>
                         <a href="<?= base_url('work-orders/create') ?>" class="btn btn-primary btn-sm">
-                            <?= lang('App.create_first_order') ?>
+                            Ersten Auftrag erstellen
                         </a>
                     </div>
                 <?php endif; ?>
@@ -197,7 +197,7 @@
             <div class="card-header">
                 <h5 class="card-title mb-0">
                     <i class="bi bi-exclamation-triangle me-2"></i>
-                    <?= lang('App.critical_assets') ?>
+                    Kritische Anlagen
                 </h5>
             </div>
             <div class="card-body">
@@ -212,19 +212,19 @@
                                         <?= esc($asset['location']) ?>
                                     </small>
                                 </div>
-                                <span class="badge bg-danger rounded-pill"><?= lang('App.critical') ?></span>
+                                <span class="badge bg-danger rounded-pill">Kritisch</span>
                             </div>
                         <?php endforeach; ?>
                     </div>
                     <div class="text-center mt-3">
                         <a href="<?= base_url('assets') ?>" class="btn btn-outline-danger btn-sm">
-                            <?= lang('App.show_all_critical') ?>
+                            Alle kritischen anzeigen
                         </a>
                     </div>
                 <?php else: ?>
                     <div class="text-center text-muted py-4">
                         <i class="bi bi-check-circle display-6 text-success"></i>
-                        <p class="mt-2"><?= lang('App.no_critical_assets') ?></p>
+                        <p class="mt-2">Keine kritischen Anlagen</p>
                     </div>
                 <?php endif; ?>
             </div>
@@ -292,7 +292,7 @@ const assetChart = new Chart(assetCtx, {
             <?php endforeach; ?>
         ],
         datasets: [{
-            label: '<?= lang('App.number_of_assets') ?>',
+            label: 'Anzahl Anlagen',
             data: [
                 <?php foreach ($stats['asset_stats']['by_status'] as $status): ?>
                     <?= $status['count'] ?>,
@@ -322,10 +322,10 @@ function refreshDashboard() {
         .then(response => response.json())
         .then(data => {
             // Update stats cards
-            location.reload(); // <?= lang('App.simple_solution_for_now') ?>
+            location.reload(); // Einfache Lösung für jetzt
         })
         .catch(error => {
-            console.error('<?= lang('App.error_refreshing') ?>:', error);
+            console.error('Fehler beim Aktualisieren:', error);
         });
 }
 </script>
@@ -346,21 +346,21 @@ function getStatusColor($status) {
 
 function getStatusText($status) {
     switch ($status) {
-        case 'open': return lang('App.status_open');
-        case 'in_progress': return lang('App.status_in_progress');
-        case 'completed': return lang('App.status_completed');
-        case 'cancelled': return lang('App.status_cancelled');
-        case 'on_hold': return lang('App.status_on_hold');
+        case 'open': return 'Offen';
+        case 'in_progress': return 'In Bearbeitung';
+        case 'completed': return 'Abgeschlossen';
+        case 'cancelled': return 'Abgebrochen';
+        case 'on_hold': return 'Pausiert';
         default: return ucfirst($status);
     }
 }
 
 function getAssetStatusText($status) {
     switch ($status) {
-        case 'operational': return lang('App.asset_status_operational');
-        case 'maintenance': return lang('App.asset_status_maintenance');
-        case 'out_of_order': return lang('App.asset_status_out_of_order');
-        case 'decommissioned': return lang('App.asset_status_decommissioned');
+        case 'operational': return 'Betriebsbereit';
+        case 'maintenance': return 'Wartung';
+        case 'out_of_order': return 'Außer Betrieb';
+        case 'decommissioned': return 'Stillgelegt';
         default: return ucfirst($status);
     }
 }

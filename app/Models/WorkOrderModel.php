@@ -104,15 +104,26 @@ class WorkOrderModel extends Model
     /**
      * Get work orders with related data
      */
-    public function getWorkOrdersWithDetails()
+    public function getWorkOrdersWithDetails($limit = null, $offset = null)
     {
-        return $this->select('work_orders.*, assets.name as asset_name, 
-                             assigned.username as assigned_username,
-                             creator.username as creator_username')
-                    ->join('assets', 'assets.id = work_orders.asset_id', 'left')
-                    ->join('users assigned', 'assigned.id = work_orders.assigned_user_id', 'left')
-                    ->join('users creator', 'creator.id = work_orders.created_by_user_id', 'left')
-                    ->findAll();
+        $builder = $this->select('work_orders.id, work_orders.work_order_number, work_orders.title,
+                                 work_orders.description, work_orders.type, work_orders.status,
+                                 work_orders.priority, work_orders.scheduled_date, work_orders.created_at,
+                                 work_orders.updated_at, assets.name as asset_name,
+                                 assigned.username as assigned_username, assigned.first_name as assigned_first_name,
+                                 assigned.last_name as assigned_last_name,
+                                 creator.username as creator_username, creator.first_name as creator_first_name,
+                                 creator.last_name as creator_last_name')
+                        ->join('assets', 'assets.id = work_orders.asset_id', 'left')
+                        ->join('users assigned', 'assigned.id = work_orders.assigned_user_id', 'left')
+                        ->join('users creator', 'creator.id = work_orders.created_by_user_id', 'left')
+                        ->orderBy('work_orders.created_at', 'DESC');
+
+        if ($limit !== null) {
+            $builder->limit($limit, $offset ?? 0);
+        }
+
+        return $builder->findAll();
     }
 
     /**
@@ -153,26 +164,51 @@ class WorkOrderModel extends Model
      */
     public function getWorkOrderStatistics()
     {
-        // Status statistics
-        $statusStats = $this->select('status, COUNT(*) as count')
-                           ->groupBy('status')
-                           ->findAll();
+        // Use a single query to get all statistics
+        $db = \Config\Database::connect();
+        $builder = $db->table($this->table);
 
-        // Priority statistics  
-        $priorityStats = $this->select('priority, COUNT(*) as count')
-                             ->groupBy('priority')
-                             ->findAll();
+        // Get all statistics in one query
+        $query = "SELECT
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) as open_count,
+                    SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as in_progress_count,
+                    SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_count,
+                    SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled_count,
+                    SUM(CASE WHEN status = 'on_hold' THEN 1 ELSE 0 END) as on_hold_count,
+                    SUM(CASE WHEN priority = 'low' THEN 1 ELSE 0 END) as low_priority,
+                    SUM(CASE WHEN priority = 'medium' THEN 1 ELSE 0 END) as medium_priority,
+                    SUM(CASE WHEN priority = 'high' THEN 1 ELSE 0 END) as high_priority,
+                    SUM(CASE WHEN priority = 'critical' THEN 1 ELSE 0 END) as critical_priority,
+                    SUM(CASE WHEN type = 'preventive' THEN 1 ELSE 0 END) as preventive_type,
+                    SUM(CASE WHEN type = 'corrective' THEN 1 ELSE 0 END) as corrective_type,
+                    SUM(CASE WHEN type = 'emergency' THEN 1 ELSE 0 END) as emergency_type,
+                    SUM(CASE WHEN type = 'inspection' THEN 1 ELSE 0 END) as inspection_type
+                  FROM {$this->table}";
 
-        // Type statistics
-        $typeStats = $this->select('type, COUNT(*) as count')
-                         ->groupBy('type')
-                         ->findAll();
+        $result = $db->query($query)->getRowArray();
 
         return [
-            'total' => $this->countAll(),
-            'by_status' => $statusStats,
-            'by_priority' => $priorityStats,
-            'by_type' => $typeStats
+            'total' => (int) $result['total'],
+            'by_status' => [
+                ['status' => 'open', 'count' => (int) $result['open_count']],
+                ['status' => 'in_progress', 'count' => (int) $result['in_progress_count']],
+                ['status' => 'completed', 'count' => (int) $result['completed_count']],
+                ['status' => 'cancelled', 'count' => (int) $result['cancelled_count']],
+                ['status' => 'on_hold', 'count' => (int) $result['on_hold_count']]
+            ],
+            'by_priority' => [
+                ['priority' => 'low', 'count' => (int) $result['low_priority']],
+                ['priority' => 'medium', 'count' => (int) $result['medium_priority']],
+                ['priority' => 'high', 'count' => (int) $result['high_priority']],
+                ['priority' => 'critical', 'count' => (int) $result['critical_priority']]
+            ],
+            'by_type' => [
+                ['type' => 'preventive', 'count' => (int) $result['preventive_type']],
+                ['type' => 'corrective', 'count' => (int) $result['corrective_type']],
+                ['type' => 'emergency', 'count' => (int) $result['emergency_type']],
+                ['type' => 'inspection', 'count' => (int) $result['inspection_type']]
+            ]
         ];
     }
     
@@ -184,15 +220,25 @@ class WorkOrderModel extends Model
     }
 
     /**
-     * Search work orders
+     * Search work orders with proper escaping
      */
-    public function searchWorkOrders($query)
+    public function searchWorkOrders($query, $limit = 50)
     {
-        return $this->groupStart()
-                    ->like('work_order_number', $query)
-                    ->orLike('title', $query)
-                    ->orLike('description', $query)
+        if (empty($query) || strlen(trim($query)) < 2) {
+            return [];
+        }
+
+        // Escape and sanitize the search query
+        $escapedQuery = $this->db->escapeLikeString(esc($query));
+
+        return $this->select('id, work_order_number, title, description, status, priority, created_at')
+                    ->groupStart()
+                        ->like('work_order_number', $escapedQuery, 'both', false)
+                        ->orLike('title', $escapedQuery, 'both', false)
+                        ->orLike('description', $escapedQuery, 'both', false)
                     ->groupEnd()
+                    ->orderBy('created_at', 'DESC')
+                    ->limit($limit)
                     ->findAll();
     }
 }

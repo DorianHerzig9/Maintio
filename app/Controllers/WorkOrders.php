@@ -90,14 +90,14 @@ class WorkOrders extends BaseController
         }
 
         $data = [
-            'title' => $this->request->getPost('title'),
-            'description' => $this->request->getPost('description'),
+            'title' => esc($this->request->getPost('title')),
+            'description' => esc($this->request->getPost('description')),
             'type' => $this->request->getPost('type'),
             'status' => 'open',
             'priority' => $this->request->getPost('priority'),
             'asset_id' => $this->request->getPost('asset_id') ?: null,
             'assigned_user_id' => $this->request->getPost('assigned_user_id') ?: null,
-            'created_by_user_id' => 1, // TODO: Aktueller Benutzer aus Session
+            'created_by_user_id' => $this->getCurrentUserId() ?? 1, // Get from session or fallback
             'scheduled_date' => $this->request->getPost('scheduled_date') ?: null,
             'estimated_duration' => $this->request->getPost('estimated_duration') ?: null
         ];
@@ -113,9 +113,9 @@ class WorkOrders extends BaseController
                     foreach ($components as $component) {
                         if (!empty($component['kks_number']) && !empty($component['component_name'])) {
                             $validComponents[] = [
-                                'kks_number' => trim($component['kks_number']),
-                                'component_name' => trim($component['component_name']),
-                                'description' => !empty($component['description']) ? trim($component['description']) : null
+                                'kks_number' => esc(trim($component['kks_number'])),
+                                'component_name' => esc(trim($component['component_name'])),
+                                'description' => !empty($component['description']) ? esc(trim($component['description'])) : null
                             ];
                         }
                     }
@@ -185,8 +185,8 @@ class WorkOrders extends BaseController
         }
 
         $data = [
-            'title' => $this->request->getPost('title'),
-            'description' => $this->request->getPost('description'),
+            'title' => esc($this->request->getPost('title')),
+            'description' => esc($this->request->getPost('description')),
             'type' => $this->request->getPost('type'),
             'status' => $this->request->getPost('status'),
             'priority' => $this->request->getPost('priority'),
@@ -195,7 +195,7 @@ class WorkOrders extends BaseController
             'scheduled_date' => $this->request->getPost('scheduled_date') ?: null,
             'estimated_duration' => $this->request->getPost('estimated_duration') ?: null,
             'actual_duration' => $this->request->getPost('actual_duration') ?: null,
-            'notes' => $this->request->getPost('notes')
+            'notes' => esc($this->request->getPost('notes'))
         ];
 
         // Status-spezifische Logik

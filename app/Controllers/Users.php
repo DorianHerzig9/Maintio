@@ -66,14 +66,14 @@ class Users extends BaseController
 
         try {
             $userData = [
-                'username' => $this->request->getPost('username'),
-                'email' => $this->request->getPost('email'),
-                'first_name' => $this->request->getPost('first_name'),
-                'last_name' => $this->request->getPost('last_name'),
-                'password' => $this->request->getPost('password'),
+                'username' => esc($this->request->getPost('username')),
+                'email' => filter_var($this->request->getPost('email'), FILTER_SANITIZE_EMAIL),
+                'first_name' => esc($this->request->getPost('first_name')),
+                'last_name' => esc($this->request->getPost('last_name')),
+                'password' => $this->request->getPost('password'), // Will be hashed by model
                 'role' => $this->request->getPost('role'),
-                'department' => $this->request->getPost('department'),
-                'phone' => $this->request->getPost('phone'),
+                'department' => esc($this->request->getPost('department')),
+                'phone' => esc($this->request->getPost('phone')),
                 'is_active' => $this->request->getPost('is_active') ? 1 : 0
             ];
 
@@ -160,13 +160,13 @@ class Users extends BaseController
 
         try {
             $userData = [
-                'username' => $this->request->getPost('username'),
-                'email' => $this->request->getPost('email'),
-                'first_name' => $this->request->getPost('first_name'),
-                'last_name' => $this->request->getPost('last_name'),
+                'username' => esc($this->request->getPost('username')),
+                'email' => filter_var($this->request->getPost('email'), FILTER_SANITIZE_EMAIL),
+                'first_name' => esc($this->request->getPost('first_name')),
+                'last_name' => esc($this->request->getPost('last_name')),
                 'role' => $this->request->getPost('role'),
-                'department' => $this->request->getPost('department'),
-                'phone' => $this->request->getPost('phone'),
+                'department' => esc($this->request->getPost('department')),
+                'phone' => esc($this->request->getPost('phone')),
                 'is_active' => $this->request->getPost('is_active') ? 1 : 0
             ];
 
