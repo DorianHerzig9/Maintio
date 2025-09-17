@@ -5,7 +5,7 @@
 <div class="row">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-bar-chart me-2"></i>Berichte & Analysen</h2>
+            <div></div>
             <div class="dropdown">
                 <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                     <i class="bi bi-download me-1"></i>Berichte exportieren

@@ -5,7 +5,6 @@
 <!-- Page Header -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2 class="h3 mb-0"><?= $page_title ?></h2>
         <p class="text-muted">Verwaltung von Instandhaltungsplänen</p>
     </div>
     <div>

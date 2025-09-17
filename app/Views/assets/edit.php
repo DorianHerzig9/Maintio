@@ -153,10 +153,11 @@
                     <!-- Beschreibung -->
                     <div class="mb-3">
                         <label for="description" class="form-label">Beschreibung</label>
-                        <textarea class="form-control" id="description" name="description" rows="4" 
+                        <textarea class="form-control" id="description" name="description" rows="4"
                                   placeholder="Detaillierte Beschreibung der Anlage"><?= esc($asset['description']) ?></textarea>
                         <div class="invalid-feedback"></div>
                     </div>
+
 
                     <!-- Buttons -->
                     <div class="row">

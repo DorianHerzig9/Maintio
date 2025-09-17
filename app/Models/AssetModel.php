@@ -15,7 +15,7 @@ class AssetModel extends Model
     protected $allowedFields    = [
         'name', 'asset_number', 'type', 'location', 'status', 'priority',
         'manufacturer', 'model', 'serial_number', 'installation_date',
-        'purchase_price', 'description', 'svg_position_x', 'svg_position_y'
+        'purchase_price', 'description'
     ];
 
     protected bool $allowEmptyInserts = false;

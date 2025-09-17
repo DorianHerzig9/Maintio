@@ -95,9 +95,10 @@
                         </div>
                         
                         <div class="col-md-6 mb-3">
-                            <label for="scheduled_date" class="form-label">Geplantes Datum</label>
-                            <input type="datetime-local" class="form-control" id="scheduled_date" name="scheduled_date" 
+                            <label for="scheduled_date" class="form-label">Fälligkeitsdatum <i class="bi bi-calendar-event text-primary"></i></label>
+                            <input type="datetime-local" class="form-control" id="scheduled_date" name="scheduled_date"
                                    value="<?= old('scheduled_date', $work_order['scheduled_date'] ? date('Y-m-d\TH:i', strtotime($work_order['scheduled_date'])) : '') ?>">
+                            <div class="form-text">Bis wann muss der Arbeitsauftrag abgeschlossen sein?</div>
                         </div>
                     </div>
 

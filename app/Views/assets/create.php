@@ -134,6 +134,7 @@
                         <div class="form-text">Detaillierte Beschreibung der Anlage</div>
                     </div>
 
+
                     <div class="d-flex justify-content-between">
                         <a href="<?= base_url('assets') ?>" class="btn btn-secondary">
                             <i class="bi bi-arrow-left me-1"></i>Zurück

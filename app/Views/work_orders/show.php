@@ -133,9 +133,19 @@
                 <div class="row">
                     <?php if ($work_order['scheduled_date']): ?>
                         <div class="col-md-6 mb-2">
-                            <strong>Geplant für:</strong><br>
+                            <strong>Fälligkeitsdatum:</strong><br>
                             <i class="bi bi-calendar-event me-1"></i>
-                            <?= date('d.m.Y H:i', strtotime($work_order['scheduled_date'])) ?>
+                            <?php
+                            $dueDate = strtotime($work_order['scheduled_date']);
+                            $isOverdue = $dueDate < time() && $work_order['status'] !== 'completed';
+                            $dateClass = $isOverdue ? 'text-danger fw-bold' : '';
+                            ?>
+                            <span class="<?= $dateClass ?>">
+                                <?= date('d.m.Y H:i', $dueDate) ?>
+                                <?php if ($isOverdue): ?>
+                                    <i class="bi bi-exclamation-triangle text-danger" title="Überfällig"></i>
+                                <?php endif; ?>
+                            </span>
                         </div>
                     <?php endif; ?>
                     

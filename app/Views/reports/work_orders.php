@@ -226,9 +226,12 @@
                                     </td>
                                     <td><?= date('d.m.Y', strtotime($order['created_at'])) ?></td>
                                     <td>
-                                        <?php if (isset($order['due_date']) && $order['due_date']): ?>
-                                            <span class="<?= strtotime($order['due_date']) < time() && $order['status'] !== 'completed' ? 'text-danger' : '' ?>">
-                                                <?= date('d.m.Y', strtotime($order['due_date'])) ?>
+                                        <?php if (isset($order['scheduled_date']) && $order['scheduled_date']): ?>
+                                            <span class="<?= strtotime($order['scheduled_date']) < time() && $order['status'] !== 'completed' ? 'text-danger' : '' ?>">
+                                                <?= date('d.m.Y', strtotime($order['scheduled_date'])) ?>
+                                                <?php if (strtotime($order['scheduled_date']) < time() && $order['status'] !== 'completed'): ?>
+                                                    <i class="bi bi-exclamation-triangle text-danger ms-1" title="Überfällig"></i>
+                                                <?php endif; ?>
                                             </span>
                                         <?php else: ?>
                                             <span class="text-muted">-</span>

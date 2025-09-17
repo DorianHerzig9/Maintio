@@ -62,6 +62,47 @@ class WorkOrderModel extends Model
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 
+    /**
+     * Get overdue work orders
+     */
+    public function getOverdueWorkOrders($limit = null)
+    {
+        $builder = $this->select('work_orders.*, assets.name as asset_name, assets.asset_number,
+                                 users.first_name, users.last_name')
+                        ->join('assets', 'work_orders.asset_id = assets.id', 'left')
+                        ->join('users', 'work_orders.assigned_user_id = users.id', 'left')
+                        ->where('work_orders.scheduled_date <', date('Y-m-d H:i:s'))
+                        ->whereIn('work_orders.status', ['open', 'in_progress'])
+                        ->orderBy('work_orders.scheduled_date', 'ASC');
+
+        if ($limit) {
+            $builder->limit($limit);
+        }
+
+        return $builder->findAll();
+    }
+
+    /**
+     * Get work orders due soon
+     */
+    public function getDueSoonWorkOrders($days = 7, $limit = null)
+    {
+        $builder = $this->select('work_orders.*, assets.name as asset_name, assets.asset_number,
+                                 users.first_name, users.last_name')
+                        ->join('assets', 'work_orders.asset_id = assets.id', 'left')
+                        ->join('users', 'work_orders.assigned_user_id = users.id', 'left')
+                        ->where('work_orders.scheduled_date >=', date('Y-m-d H:i:s'))
+                        ->where('work_orders.scheduled_date <=', date('Y-m-d H:i:s', strtotime("+{$days} days")))
+                        ->whereIn('work_orders.status', ['open', 'in_progress'])
+                        ->orderBy('work_orders.scheduled_date', 'ASC');
+
+        if ($limit) {
+            $builder->limit($limit);
+        }
+
+        return $builder->findAll();
+    }
+
     // Callbacks
     protected $allowCallbacks = true;
     protected $beforeInsert   = ['generateWorkOrderNumber'];

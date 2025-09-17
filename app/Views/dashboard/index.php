@@ -231,8 +231,114 @@
         </div>
     </div>
 
+    <!-- Overdue Work Orders Widget -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                    Überfällige Arbeitsaufträge
+                </h5>
+                <span class="badge bg-danger"><?= count($overdue_work_orders) ?></span>
+            </div>
+            <div class="card-body">
+                <?php if (!empty($overdue_work_orders)): ?>
+                    <div class="list-group list-group-flush">
+                        <?php foreach ($overdue_work_orders as $order): ?>
+                            <div class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold text-danger">
+                                        <a href="<?= base_url('work-orders/' . $order['id']) ?>" class="text-danger text-decoration-none">
+                                            <?= esc($order['title']) ?>
+                                        </a>
+                                    </div>
+                                    <small class="text-muted">
+                                        <?= esc($order['work_order_number']) ?> •
+                                        Fällig: <?= date('d.m.Y H:i', strtotime($order['scheduled_date'])) ?>
+                                        <?php if ($order['asset_name']): ?>
+                                            • <?= esc($order['asset_name']) ?>
+                                        <?php endif; ?>
+                                    </small>
+                                </div>
+                                <span class="badge bg-outline-danger">
+                                    <?php
+                                    $overdueDays = floor((time() - strtotime($order['scheduled_date'])) / (60 * 60 * 24));
+                                    echo $overdueDays . ' Tag' . ($overdueDays != 1 ? 'e' : '');
+                                    ?>
+                                </span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="<?= base_url('work-orders') ?>" class="btn btn-outline-danger btn-sm">
+                            Alle überfälligen anzeigen
+                        </a>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-check-circle display-6 text-success"></i>
+                        <p class="mt-2">Keine überfälligen Aufträge</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Due Soon Work Orders Widget -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-clock text-warning me-2"></i>
+                    Bald fällige Aufträge
+                </h5>
+                <span class="badge bg-warning"><?= count($due_soon_work_orders) ?></span>
+            </div>
+            <div class="card-body">
+                <?php if (!empty($due_soon_work_orders)): ?>
+                    <div class="list-group list-group-flush">
+                        <?php foreach ($due_soon_work_orders as $order): ?>
+                            <div class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">
+                                        <a href="<?= base_url('work-orders/' . $order['id']) ?>" class="text-decoration-none">
+                                            <?= esc($order['title']) ?>
+                                        </a>
+                                    </div>
+                                    <small class="text-muted">
+                                        <?= esc($order['work_order_number']) ?> •
+                                        Fällig: <?= date('d.m.Y H:i', strtotime($order['scheduled_date'])) ?>
+                                        <?php if ($order['asset_name']): ?>
+                                            • <?= esc($order['asset_name']) ?>
+                                        <?php endif; ?>
+                                    </small>
+                                </div>
+                                <span class="badge bg-warning">
+                                    <?php
+                                    $daysLeft = floor((strtotime($order['scheduled_date']) - time()) / (60 * 60 * 24));
+                                    echo $daysLeft . ' Tag' . ($daysLeft != 1 ? 'e' : '');
+                                    ?>
+                                </span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="<?= base_url('work-orders') ?>" class="btn btn-outline-warning btn-sm">
+                            Alle bald fälligen anzeigen
+                        </a>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-calendar-check display-6 text-success"></i>
+                        <p class="mt-2">Keine bald fälligen Aufträge</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
     <!-- Preventive Maintenance Widget -->
-    <?php 
+    <?php
     $preventive_maintenance_data = [
         'upcoming_maintenance' => $upcoming_maintenance,
         'overdue_maintenance' => $overdue_maintenance

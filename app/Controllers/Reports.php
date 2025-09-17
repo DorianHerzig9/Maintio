@@ -291,7 +291,7 @@ class Reports extends BaseController
      */
     private function getAssetsReport($status = null, $type = null, $location = null)
     {
-        $builder = $this->assetModel;
+        $builder = $this->assetModel->select('id, name, asset_number, type, location, status, priority, manufacturer, model, serial_number, installation_date, purchase_price, description, created_at, updated_at');
 
         if ($status) {
             $builder->where('status', $status);

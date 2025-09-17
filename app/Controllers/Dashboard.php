@@ -33,6 +33,8 @@ class Dashboard extends BaseController
             'recent_work_orders' => $this->getRecentWorkOrders(),
             'critical_assets' => $this->getCriticalAssets(),
             'upcoming_tasks' => $this->getUpcomingTasks(),
+            'overdue_work_orders' => $this->workOrderModel->getOverdueWorkOrders(10),
+            'due_soon_work_orders' => $this->workOrderModel->getDueSoonWorkOrders(7, 10),
             'upcoming_maintenance' => $this->pmModel->getUpcomingSchedules(14),
             'overdue_maintenance' => $this->pmModel->getOverdueSchedules()
         ];
