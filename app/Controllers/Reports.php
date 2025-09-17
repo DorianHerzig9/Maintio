@@ -7,6 +7,7 @@ use App\Models\WorkOrderModel;
 use App\Models\AssetModel;
 use App\Models\UserModel;
 use App\Models\PreventiveMaintenanceModel;
+use App\Libraries\PDFExporter;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class Reports extends BaseController
@@ -151,7 +152,13 @@ class Reports extends BaseController
             case 'csv':
                 return $this->exportToCSV($workOrders, 'arbeitsauftraege_' . date('Y-m-d'));
             case 'pdf':
-                return $this->exportToPDF($workOrders, 'Arbeitsaufträge Bericht');
+                $filters = [
+                    'date_from' => $dateFrom,
+                    'date_to' => $dateTo,
+                    'status' => $this->request->getGet('status'),
+                    'technician' => $this->request->getGet('technician')
+                ];
+                return $this->exportToPDF($workOrders, 'Arbeitsaufträge Bericht', 'work_orders', $filters);
             case 'excel':
                 return $this->exportToExcel($workOrders, 'arbeitsauftraege_' . date('Y-m-d'));
             default:
@@ -171,7 +178,12 @@ class Reports extends BaseController
             case 'csv':
                 return $this->exportToCSV($assets, 'anlagen_' . date('Y-m-d'));
             case 'pdf':
-                return $this->exportToPDF($assets, 'Anlagen Bericht');
+                $filters = [
+                    'status' => $this->request->getGet('status'),
+                    'type' => $this->request->getGet('type'),
+                    'location' => $this->request->getGet('location')
+                ];
+                return $this->exportToPDF($assets, 'Anlagen Bericht', 'assets', $filters);
             case 'excel':
                 return $this->exportToExcel($assets, 'anlagen_' . date('Y-m-d'));
             default:
@@ -222,9 +234,9 @@ class Reports extends BaseController
     private function getWorkOrdersReport($dateFrom = null, $dateTo = null, $status = null, $technician = null)
     {
         $builder = $this->workOrderModel
-            ->select('work_orders.*, assets.asset_name, assets.asset_number, users.first_name, users.last_name')
+            ->select('work_orders.*, assets.name as asset_name, assets.asset_number, users.first_name, users.last_name')
             ->join('assets', 'work_orders.asset_id = assets.id', 'left')
-            ->join('users', 'work_orders.assigned_to = users.id', 'left');
+            ->join('users', 'work_orders.assigned_user_id = users.id', 'left');
 
         if ($dateFrom) {
             $builder->where('work_orders.created_at >=', $dateFrom);
@@ -239,7 +251,7 @@ class Reports extends BaseController
         }
 
         if ($technician) {
-            $builder->where('work_orders.assigned_to', $technician);
+            $builder->where('work_orders.assigned_user_id', $technician);
         }
 
         return $builder->orderBy('work_orders.created_at', 'DESC')->findAll();
@@ -286,14 +298,14 @@ class Reports extends BaseController
         }
 
         if ($type) {
-            $builder->where('asset_type', $type);
+            $builder->where('type', $type);
         }
 
         if ($location) {
             $builder->where('location', $location);
         }
 
-        return $builder->orderBy('asset_name', 'ASC')->findAll();
+        return $builder->orderBy('name', 'ASC')->findAll();
     }
 
     /**
@@ -321,7 +333,7 @@ class Reports extends BaseController
     private function getMaintenanceReport($dateFrom, $dateTo, $type = null)
     {
         $builder = $this->preventiveMaintenanceModel
-            ->select('preventive_maintenance.*, assets.asset_name, assets.asset_number')
+            ->select('preventive_maintenance.*, assets.name as asset_name, assets.asset_number')
             ->join('assets', 'preventive_maintenance.asset_id = assets.id', 'left');
 
         if ($dateFrom) {
@@ -374,18 +386,24 @@ class Reports extends BaseController
     private function exportToCSV($data, $filename)
     {
         $response = $this->response;
-        $response->setHeader('Content-Type', 'text/csv');
+        $response->setHeader('Content-Type', 'text/csv; charset=UTF-8');
         $response->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '.csv"');
 
         $output = fopen('php://output', 'w');
 
+        // Add BOM for proper UTF-8 encoding in Excel
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
         if (!empty($data)) {
-            // Write headers
-            fputcsv($output, array_keys($data[0]));
+            // Write headers with German column names
+            $headers = $this->getGermanHeaders(array_keys($data[0]));
+            fputcsv($output, $headers, ';');
 
             // Write data
             foreach ($data as $row) {
-                fputcsv($output, $row);
+                // Format data for better readability
+                $formattedRow = $this->formatRowForCSV($row);
+                fputcsv($output, $formattedRow, ';');
             }
         }
 
@@ -393,13 +411,227 @@ class Reports extends BaseController
         return $response;
     }
 
+    private function getGermanHeaders($keys)
+    {
+        $translations = [
+            'id' => 'ID',
+            'work_order_number' => 'Auftragsnummer',
+            'title' => 'Titel',
+            'description' => 'Beschreibung',
+            'status' => 'Status',
+            'priority' => 'Priorität',
+            'created_at' => 'Erstellt am',
+            'due_date' => 'Fällig am',
+            'completed_at' => 'Abgeschlossen am',
+            'asset_name' => 'Anlage',
+            'asset_number' => 'Anlagennummer',
+            'first_name' => 'Vorname',
+            'last_name' => 'Nachname',
+            'name' => 'Name',
+            'type' => 'Typ',
+            'location' => 'Standort',
+            'manufacturer' => 'Hersteller',
+            'installation_date' => 'Installationsdatum'
+        ];
+
+        return array_map(function($key) use ($translations) {
+            return $translations[$key] ?? ucfirst(str_replace('_', ' ', $key));
+        }, $keys);
+    }
+
+    private function formatRowForCSV($row)
+    {
+        return array_map(function($value) {
+            if (is_null($value)) {
+                return '';
+            }
+
+            // Format dates
+            if (preg_match('/^\d{4}-\d{2}-\d{2}/', $value)) {
+                return date('d.m.Y', strtotime($value));
+            }
+
+            // Format datetime
+            if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $value)) {
+                return date('d.m.Y H:i', strtotime($value));
+            }
+
+            return $value;
+        }, $row);
+    }
+
     /**
      * Export data to PDF
      */
-    private function exportToPDF($data, $title)
+    private function exportToPDF($data, $title, $type = 'work_orders', $filters = [])
     {
-        // PDF export would be implemented here using a library like TCPDF or mPDF
-        return redirect()->back()->with('info', 'PDF Export wird in einer zukünftigen Version verfügbar sein');
+        try {
+            // Clear any previous output
+            if (ob_get_level()) {
+                ob_end_clean();
+            }
+
+            $pdf = new PDFExporter($title);
+            $pdf->AddPage();
+
+            // Add filter information
+            if (!empty($filters)) {
+                $filterInfo = [];
+                foreach ($filters as $key => $value) {
+                    if (!empty($value)) {
+                        switch ($key) {
+                            case 'date_from':
+                                $filterInfo['Von Datum'] = date('d.m.Y', strtotime($value));
+                                break;
+                            case 'date_to':
+                                $filterInfo['Bis Datum'] = date('d.m.Y', strtotime($value));
+                                break;
+                            case 'status':
+                                $filterInfo['Status'] = $this->getStatusText($value);
+                                break;
+                            case 'technician':
+                                $filterInfo['Techniker'] = $this->getTechnicianName($value);
+                                break;
+                            case 'type':
+                                $filterInfo['Typ'] = $value;
+                                break;
+                            case 'location':
+                                $filterInfo['Standort'] = $value;
+                                break;
+                        }
+                    }
+                }
+                if (!empty($filterInfo)) {
+                    $pdf->addFilterInfo($filterInfo);
+                }
+            }
+
+            // Add statistics
+            if ($type === 'work_orders') {
+                $stats = $this->getWorkOrderStats($filters['date_from'] ?? null, $filters['date_to'] ?? null);
+                $pdf->addStatistics([
+                    'Gesamt Aufträge' => $stats['total'],
+                    'Abgeschlossen' => $stats['completed'],
+                    'In Bearbeitung' => $stats['in_progress'],
+                    'Offen' => $stats['open'],
+                    'Abschlussrate' => $stats['completion_rate'] . '%'
+                ]);
+            } elseif ($type === 'assets') {
+                $stats = $this->getAssetStats();
+                $pdf->addStatistics([
+                    'Gesamt Anlagen' => $stats['total'],
+                    'Betriebsbereit' => $stats['operational'],
+                    'In Wartung' => $stats['maintenance'],
+                    'Außer Betrieb' => $stats['out_of_service'],
+                    'Verfügbarkeitsrate' => $stats['operational_rate'] . '%'
+                ]);
+            }
+
+            // Add table
+            if ($type === 'work_orders') {
+                $headers = ['Nr.', 'Titel', 'Anlage', 'Techniker', 'Status', 'Priorität', 'Erstellt'];
+                $tableData = [];
+
+                foreach ($data as $order) {
+                    $tableData[] = [
+                        $order['work_order_number'] ?? '-',
+                        $this->truncateText($order['title'] ?? '-', 20),
+                        $this->truncateText($order['asset_name'] ?? '-', 15),
+                        $this->truncateText(($order['first_name'] ?? '') . ' ' . ($order['last_name'] ?? ''), 15),
+                        $this->getStatusText($order['status'] ?? ''),
+                        $this->getPriorityText($order['priority'] ?? 'medium'),
+                        isset($order['created_at']) ? date('d.m.Y', strtotime($order['created_at'])) : '-'
+                    ];
+                }
+
+                $pdf->addTable($headers, $tableData, [25, 35, 25, 25, 20, 20, 15]);
+
+            } elseif ($type === 'assets') {
+                $headers = ['Name', 'Typ', 'Standort', 'Status', 'Hersteller'];
+                $tableData = [];
+
+                foreach ($data as $asset) {
+                    $tableData[] = [
+                        $this->truncateText($asset['name'] ?? '-', 25),
+                        $this->truncateText($asset['type'] ?? '-', 15),
+                        $this->truncateText($asset['location'] ?? '-', 20),
+                        $this->getAssetStatusText($asset['status'] ?? ''),
+                        $this->truncateText($asset['manufacturer'] ?? '-', 20)
+                    ];
+                }
+
+                $pdf->addTable($headers, $tableData, [40, 25, 30, 25, 45]);
+            }
+
+            // Generate filename
+            $filename = strtolower(str_replace([' ', 'ä', 'ö', 'ü', 'ß'], ['_', 'ae', 'oe', 'ue', 'ss'], $title)) . '_' . date('Y-m-d') . '.pdf';
+
+            // Set proper headers for PDF output
+            $this->response->setHeader('Content-Type', 'application/pdf');
+            $this->response->setHeader('Content-Disposition', 'inline; filename="' . $filename . '"');
+            $this->response->setHeader('Cache-Control', 'private, max-age=0, must-revalidate');
+            $this->response->setHeader('Pragma', 'public');
+
+            // Output PDF directly
+            $pdf->Output($filename, 'I');
+            exit();
+
+        } catch (\Exception $e) {
+            log_message('error', 'PDF Export Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Fehler beim Erstellen des PDF: ' . $e->getMessage());
+        }
+    }
+
+    private function truncateText($text, $length)
+    {
+        return strlen($text) > $length ? substr($text, 0, $length - 3) . '...' : $text;
+    }
+
+    private function getStatusText($status)
+    {
+        $statusMap = [
+            'open' => 'Offen',
+            'in_progress' => 'In Bearbeitung',
+            'completed' => 'Abgeschlossen',
+            'cancelled' => 'Storniert'
+        ];
+        return $statusMap[$status] ?? $status;
+    }
+
+    private function getPriorityText($priority)
+    {
+        $priorityMap = [
+            'low' => 'Niedrig',
+            'medium' => 'Mittel',
+            'high' => 'Hoch',
+            'urgent' => 'Dringend'
+        ];
+        return $priorityMap[$priority] ?? $priority;
+    }
+
+    private function getAssetStatusText($status)
+    {
+        $statusMap = [
+            'operational' => 'Betriebsbereit',
+            'maintenance' => 'In Wartung',
+            'out_of_order' => 'Defekt',
+            'decommissioned' => 'Stillgelegt'
+        ];
+        return $statusMap[$status] ?? $status;
+    }
+
+    private function getTechnicianName($technicianId)
+    {
+        if (empty($technicianId)) {
+            return 'Alle Techniker';
+        }
+
+        $technician = $this->userModel->find($technicianId);
+        if ($technician) {
+            return $technician['first_name'] . ' ' . $technician['last_name'];
+        }
+
+        return 'Unbekannt';
     }
 
     /**
@@ -426,7 +658,7 @@ class Reports extends BaseController
 
     private function getAssetTypes()
     {
-        return $this->assetModel->select('asset_type')->distinct()->findAll();
+        return $this->assetModel->select('type')->distinct()->findAll();
     }
 
     private function getAssetLocations()
@@ -455,19 +687,67 @@ class Reports extends BaseController
 
     private function getTechnicianPerformance($period, $technician)
     {
-        // Implementation for technician performance metrics
+        // For now, return empty array to test the view
         return [];
     }
 
     private function getAssetPerformance($period)
     {
-        // Implementation for asset performance metrics
+        // For now, return empty array to test the view
         return [];
     }
 
     private function getMaintenancePerformance($period)
     {
-        // Implementation for maintenance performance metrics
-        return [];
+        $data = [
+            'compliance_rate' => $this->getMaintenanceComplianceRate($period),
+            'overdue_maintenance' => $this->getOverdueMaintenance(),
+            'upcoming_maintenance' => $this->getUpcomingMaintenance(30),
+            'maintenance_costs' => $this->getMaintenanceCosts($period)
+        ];
+
+        return $data;
+    }
+
+    private function getPeriodWhereClause($period)
+    {
+        switch ($period) {
+            case 'week':
+                return 'work_orders.created_at >= datetime("now", "-7 days")';
+            case 'month':
+                return 'work_orders.created_at >= datetime("now", "-1 month")';
+            case 'quarter':
+                return 'work_orders.created_at >= datetime("now", "-3 months")';
+            case 'year':
+                return 'work_orders.created_at >= datetime("now", "-1 year")';
+            default:
+                return null;
+        }
+    }
+
+    private function getMaintenanceComplianceRate($period)
+    {
+        return 85; // Return fixed value for testing
+    }
+
+    private function getOverdueMaintenance()
+    {
+        return []; // Return empty array for testing
+    }
+
+    private function getUpcomingMaintenance($days = 30)
+    {
+        return []; // Return empty array for testing
+    }
+
+    private function getMaintenanceCosts($period)
+    {
+        // This would require a maintenance_costs table or cost tracking in work orders
+        // For now, return placeholder data
+        return [
+            'total_costs' => 0,
+            'average_cost' => 0,
+            'cost_breakdown' => []
+        ];
     }
 }

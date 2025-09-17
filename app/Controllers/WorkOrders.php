@@ -77,7 +77,7 @@ class WorkOrders extends BaseController
         $rules = [
             'title' => 'required|max_length[200]',
             'description' => 'max_length[1000]',
-            'type' => 'required|in_list[preventive,corrective,emergency,inspection]',
+            'type' => 'required|in_list[instandhaltung,instandsetzung,inspektion,notfall]',
             'priority' => 'required|in_list[low,medium,high,critical]',
             'asset_id' => 'permit_empty|integer',
             'assigned_user_id' => 'permit_empty|integer',
@@ -170,7 +170,7 @@ class WorkOrders extends BaseController
         $rules = [
             'title' => 'required|max_length[200]',
             'description' => 'max_length[1000]',
-            'type' => 'required|in_list[preventive,corrective,emergency,inspection]',
+            'type' => 'required|in_list[instandhaltung,instandsetzung,inspektion,notfall]',
             'status' => 'required|in_list[open,in_progress,completed,cancelled,on_hold]',
             'priority' => 'required|in_list[low,medium,high,critical]',
             'asset_id' => 'permit_empty|integer',

@@ -57,10 +57,10 @@
                             <label for="type" class="form-label">Typ <span class="text-danger">*</span></label>
                             <select class="form-select" id="type" name="type" required>
                                 <option value="">Typ wählen...</option>
-                                <option value="preventive" <?= old('type') === 'preventive' ? 'selected' : '' ?>>Instandhaltung</option>
-                                <option value="corrective" <?= old('type') === 'corrective' ? 'selected' : '' ?>>Korrektiv</option>
-                                <option value="emergency" <?= old('type') === 'emergency' ? 'selected' : '' ?>>Notfall</option>
-                                <option value="inspection" <?= old('type') === 'inspection' ? 'selected' : '' ?>>Inspektion</option>
+                                <option value="instandhaltung" <?= old('type') === 'instandhaltung' ? 'selected' : '' ?>>Instandhaltung</option>
+                                <option value="instandsetzung" <?= old('type') === 'instandsetzung' ? 'selected' : '' ?>>Instandsetzung</option>
+                                <option value="inspektion" <?= old('type') === 'inspektion' ? 'selected' : '' ?>>Inspektion</option>
+                                <option value="notfall" <?= old('type') === 'notfall' ? 'selected' : '' ?>>Notfall</option>
                             </select>
                         </div>
                         
@@ -111,15 +111,15 @@
                         <div class="form-text">Detaillierte Beschreibung der durchzuführenden Arbeiten</div>
                     </div>
 
-                    <!-- KKS-Komponenten -->
+                    <!-- Komponenten -->
                     <div class="mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <label class="form-label mb-0">KKS-Komponenten (Bauteile)</label>
+                            <label class="form-label mb-0">Komponenten (Bauteile)</label>
                             <button type="button" class="btn btn-outline-primary btn-sm" onclick="addComponent()">
                                 <i class="bi bi-plus me-1"></i>Komponente hinzufügen
                             </button>
                         </div>
-                        <div class="form-text mb-3">Fügen Sie die zu bearbeitenden KKS-Komponenten hinzu. Diese können später während der Bearbeitung abgehakt werden.</div>
+                        <div class="form-text mb-3">Fügen Sie die zu bearbeitenden Komponenten hinzu. Diese können später während der Bearbeitung abgehakt werden.</div>
                         
                         <div id="components-container">
                             <!-- Komponenten werden hier hinzugefügt -->
@@ -132,8 +132,8 @@
                                     <div class="flex-grow-1">
                                         <div class="row">
                                             <div class="col-md-3">
-                                                <label class="form-label">KKS-Nummer</label>
-                                                <input type="text" class="form-control" name="components[INDEX][kks_number]" 
+                                                <label class="form-label">TAG-Nummer</label>
+                                                <input type="text" class="form-control" name="components[INDEX][kks_number]"
                                                        placeholder="z.B. FBD-001">
                                             </div>
                                             <div class="col-md-4">
@@ -182,7 +182,7 @@ document.getElementById('priority').addEventListener('change', function() {
     const typeSelect = document.getElementById('type');
     
     if (priority === 'critical') {
-        typeSelect.value = 'emergency';
+        typeSelect.value = 'notfall';
     }
 });
 
@@ -193,10 +193,10 @@ document.getElementById('type').addEventListener('change', function() {
     
     // Vorgeschlagene Dauern basierend auf Typ
     const suggestions = {
-        'preventive': 120,
-        'corrective': 180,
-        'emergency': 240,
-        'inspection': 60
+        'instandhaltung': 120,
+        'instandsetzung': 180,
+        'notfall': 240,
+        'inspektion': 60
     };
     
     if (suggestions[type] && !estimatedDuration.value) {
@@ -204,7 +204,7 @@ document.getElementById('type').addEventListener('change', function() {
     }
 });
 
-// KKS-Komponenten Management
+// Komponenten Management
 let componentIndex = 0;
 
 function addComponent() {

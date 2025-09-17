@@ -18,13 +18,13 @@
                 </div>
             </div>
             <div class="card-body">
-                <!-- KKS Komponenten Liste -->
+                <!-- Komponenten Liste -->
                 <?php if (!empty($components)): ?>
                     <div class="mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h6 class="mb-0">
                                 <i class="bi bi-list-check me-2"></i>
-                                KKS-Komponenten
+                                Komponenten
                             </h6>
                             <div class="text-end">
                                 <small class="text-muted">
@@ -51,7 +51,7 @@
                                                     <?= esc($component['component_name']) ?>
                                                 </div>
                                                 <small class="text-muted">
-                                                    KKS: <?= esc($component['kks_number']) ?>
+                                                    TAG: <?= esc($component['kks_number']) ?>
                                                     <?php if (!empty($component['description'])): ?>
                                                         - <?= esc($component['description']) ?>
                                                     <?php endif; ?>
@@ -526,20 +526,20 @@ function getStatusText($status) {
 
 function getTypeColor($type) {
     switch ($type) {
-        case 'preventive': return 'info';
-        case 'corrective': return 'warning';
-        case 'emergency': return 'danger';
-        case 'inspection': return 'secondary';
+        case 'instandhaltung': return 'info';
+        case 'instandsetzung': return 'warning';
+        case 'notfall': return 'danger';
+        case 'inspektion': return 'secondary';
         default: return 'secondary';
     }
 }
 
 function getTypeText($type) {
     switch ($type) {
-        case 'preventive': return 'Instandhaltung';
-        case 'corrective': return 'Korrektiv';
-        case 'emergency': return 'Notfall';
-        case 'inspection': return 'Inspektion';
+        case 'instandhaltung': return 'Instandhaltung';
+        case 'instandsetzung': return 'Instandsetzung';
+        case 'notfall': return 'Notfall';
+        case 'inspektion': return 'Inspektion';
         default: return ucfirst($type);
     }
 }

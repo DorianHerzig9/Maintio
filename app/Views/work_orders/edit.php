@@ -61,10 +61,10 @@
                         <div class="col-md-4 mb-3">
                             <label for="type" class="form-label">Typ <span class="text-danger">*</span></label>
                             <select class="form-select" id="type" name="type" required>
-                                <option value="preventive" <?= old('type', $work_order['type']) === 'preventive' ? 'selected' : '' ?>>Instandhaltung</option>
-                                <option value="corrective" <?= old('type', $work_order['type']) === 'corrective' ? 'selected' : '' ?>>Korrektiv</option>
-                                <option value="emergency" <?= old('type', $work_order['type']) === 'emergency' ? 'selected' : '' ?>>Notfall</option>
-                                <option value="inspection" <?= old('type', $work_order['type']) === 'inspection' ? 'selected' : '' ?>>Inspektion</option>
+                                <option value="instandhaltung" <?= old('type', $work_order['type']) === 'instandhaltung' ? 'selected' : '' ?>>Instandhaltung</option>
+                                <option value="instandsetzung" <?= old('type', $work_order['type']) === 'instandsetzung' ? 'selected' : '' ?>>Instandsetzung</option>
+                                <option value="inspektion" <?= old('type', $work_order['type']) === 'inspektion' ? 'selected' : '' ?>>Inspektion</option>
+                                <option value="notfall" <?= old('type', $work_order['type']) === 'notfall' ? 'selected' : '' ?>>Notfall</option>
                             </select>
                         </div>
                         

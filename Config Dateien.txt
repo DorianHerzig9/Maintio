@@ -1,0 +1,35 @@
+Config Dateien
+
+Datei		Nutzen
+----------------------
+App.php		|  Hauptkonfiguration mit BaseURL, Sprache, Charset und Sicherheitseinstellungen
+Autoload.php	|  Definiert welche Klassen/Namespaces automatisch geladen werden
+Cache.php	|  Konfiguration für Caching-Mechanismen (Redis, File, Memory)
+Constants.php	|  Definiert globale Konstanten für die Anwendung
+Cookie.php	|  Einstellungen für Cookies (Domain, Secure, HttpOnly)
+Database.php	|  Datenbankverbindungseinstellungen (Host, User, Password, DB-Name)
+Email.php	|  SMTP-Konfiguration für E-Mail-Versand
+Encryption.php	|  Verschlüsselungsschlüssel und -algorithmen
+Events.php	|  Event-Listener und Hooks für Anwendungsereignisse
+Exceptions.php	|  Fehlerbehandlung und Exception-Konfiguration
+Feature.php	|  Feature-Flags zum Ein-/Ausschalten von Funktionen
+Filters.php	|  HTTP-Filter für Authentifizierung, CORS, Rate-Limiting
+Format.php	|  Datenformat-Einstellungen (JSON, XML)
+Honeypot.php	|  Anti-Spam Konfiguration für Formulare
+Images.php	|  Bildverarbeitungs-Einstellungen (GD, ImageMagick)
+Kint.php	|  Debug-Tool Konfiguration für Development
+Logger.php	|  Log-Level und Handler-Einstellungen
+Migrations.php	|  Datenbank-Migration Konfiguration
+Mimes.php	|  MIME-Type Definitionen für Dateien
+Modules.php	|  Module-Discovery für Composer-Packages
+Pager.php	|  Pagination-Einstellungen für Listen
+Paths.php	|  Pfad-Definitionen für Ordner-Struktur
+Publisher.php	|  Asset-Publishing Konfiguration
+Routes.php	|  URL-Routing und Route-Definitionen
+Security.php	|  CSRF, Content Security Policy, Hash-Algorithmen
+Services.php	|  Dependency Injection Container-Services
+Session.php	|  Session-Handler und -Einstellungen
+Toolbar.php	|  Debug-Toolbar Konfiguration für Development
+UserAgents.php	|  User-Agent String-Definitionen
+Validation.php	|  Validierungsregeln und Error-Templates
+View.php	|  Template-Engine Einstellungen und Parser

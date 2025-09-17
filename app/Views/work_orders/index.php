@@ -257,20 +257,20 @@ document.getElementById('search').addEventListener('input', function() {
 // Helper functions für die View
 function getTypeColor($type) {
     switch ($type) {
-        case 'preventive': return 'info';
-        case 'corrective': return 'warning';
-        case 'emergency': return 'danger';
-        case 'inspection': return 'secondary';
+        case 'instandhaltung': return 'info';
+        case 'instandsetzung': return 'warning';
+        case 'notfall': return 'danger';
+        case 'inspektion': return 'secondary';
         default: return 'secondary';
     }
 }
 
 function getTypeText($type) {
     switch ($type) {
-        case 'preventive': return 'Instandhaltung';
-        case 'corrective': return 'Korrektiv';
-        case 'emergency': return 'Notfall';
-        case 'inspection': return 'Inspektion';
+        case 'instandhaltung': return 'Instandhaltung';
+        case 'instandsetzung': return 'Instandsetzung';
+        case 'notfall': return 'Notfall';
+        case 'inspektion': return 'Inspektion';
         default: return ucfirst($type);
     }
 }

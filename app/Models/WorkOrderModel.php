@@ -35,7 +35,7 @@ class WorkOrderModel extends Model
     protected $validationRules = [
         'work_order_number' => 'permit_empty|max_length[100]|is_unique[work_orders.work_order_number,id,{id}]',
         'title' => 'required|max_length[200]',
-        'type' => 'required|in_list[preventive,corrective,emergency,inspection]',
+        'type' => 'required|in_list[instandhaltung,instandsetzung,inspektion,notfall]',
         'status' => 'required|in_list[open,in_progress,completed,cancelled,on_hold]',
         'priority' => 'required|in_list[low,medium,high,critical]',
         'created_by_user_id' => 'required|integer'
@@ -180,10 +180,10 @@ class WorkOrderModel extends Model
                     SUM(CASE WHEN priority = 'medium' THEN 1 ELSE 0 END) as medium_priority,
                     SUM(CASE WHEN priority = 'high' THEN 1 ELSE 0 END) as high_priority,
                     SUM(CASE WHEN priority = 'critical' THEN 1 ELSE 0 END) as critical_priority,
-                    SUM(CASE WHEN type = 'preventive' THEN 1 ELSE 0 END) as preventive_type,
-                    SUM(CASE WHEN type = 'corrective' THEN 1 ELSE 0 END) as corrective_type,
-                    SUM(CASE WHEN type = 'emergency' THEN 1 ELSE 0 END) as emergency_type,
-                    SUM(CASE WHEN type = 'inspection' THEN 1 ELSE 0 END) as inspection_type
+                    SUM(CASE WHEN type = 'instandhaltung' THEN 1 ELSE 0 END) as instandhaltung_type,
+                    SUM(CASE WHEN type = 'instandsetzung' THEN 1 ELSE 0 END) as instandsetzung_type,
+                    SUM(CASE WHEN type = 'inspektion' THEN 1 ELSE 0 END) as inspektion_type,
+                    SUM(CASE WHEN type = 'notfall' THEN 1 ELSE 0 END) as notfall_type
                   FROM {$this->table}";
 
         $result = $db->query($query)->getRowArray();
@@ -204,10 +204,10 @@ class WorkOrderModel extends Model
                 ['priority' => 'critical', 'count' => (int) $result['critical_priority']]
             ],
             'by_type' => [
-                ['type' => 'preventive', 'count' => (int) $result['preventive_type']],
-                ['type' => 'corrective', 'count' => (int) $result['corrective_type']],
-                ['type' => 'emergency', 'count' => (int) $result['emergency_type']],
-                ['type' => 'inspection', 'count' => (int) $result['inspection_type']]
+                ['type' => 'instandhaltung', 'count' => (int) $result['instandhaltung_type']],
+                ['type' => 'instandsetzung', 'count' => (int) $result['instandsetzung_type']],
+                ['type' => 'inspektion', 'count' => (int) $result['inspektion_type']],
+                ['type' => 'notfall', 'count' => (int) $result['notfall_type']]
             ]
         ];
     }

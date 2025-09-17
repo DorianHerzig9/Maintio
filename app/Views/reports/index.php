@@ -18,8 +18,11 @@
                         <i class="bi bi-file-earmark-spreadsheet me-2"></i>Anlagen (CSV)
                     </a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#" onclick="alert('PDF Export in Entwicklung')">
-                        <i class="bi bi-file-earmark-pdf me-2"></i>PDF Berichte
+                    <li><a class="dropdown-item" href="<?= base_url('reports/export-work-orders?format=pdf') ?>">
+                        <i class="bi bi-file-earmark-pdf me-2"></i>Arbeitsaufträge PDF
+                    </a></li>
+                    <li><a class="dropdown-item" href="<?= base_url('reports/export-assets?format=pdf') ?>">
+                        <i class="bi bi-file-earmark-pdf me-2"></i>Anlagen PDF
                     </a></li>
                 </ul>
             </div>

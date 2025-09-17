@@ -15,7 +15,7 @@
                         <li><a class="dropdown-item" href="<?= base_url('reports/export-work-orders?format=csv&' . http_build_query($filters)) ?>">
                             <i class="bi bi-file-earmark-spreadsheet me-2"></i>CSV
                         </a></li>
-                        <li><a class="dropdown-item" href="#" onclick="alert('PDF Export in Entwicklung')">
+                        <li><a class="dropdown-item" href="<?= base_url('reports/export-work-orders?format=pdf&' . http_build_query($filters)) ?>">
                             <i class="bi bi-file-earmark-pdf me-2"></i>PDF
                         </a></li>
                         <li><a class="dropdown-item" href="#" onclick="alert('Excel Export in Entwicklung')">
@@ -220,13 +220,13 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge bg-<?= getWorkOrderPriorityColor($order['priority']) ?>">
-                                            <?= getWorkOrderPriorityText($order['priority']) ?>
+                                        <span class="badge bg-<?= getWorkOrderPriorityColor($order['priority'] ?? 'medium') ?>">
+                                            <?= getWorkOrderPriorityText($order['priority'] ?? 'medium') ?>
                                         </span>
                                     </td>
                                     <td><?= date('d.m.Y', strtotime($order['created_at'])) ?></td>
                                     <td>
-                                        <?php if ($order['due_date']): ?>
+                                        <?php if (isset($order['due_date']) && $order['due_date']): ?>
                                             <span class="<?= strtotime($order['due_date']) < time() && $order['status'] !== 'completed' ? 'text-danger' : '' ?>">
                                                 <?= date('d.m.Y', strtotime($order['due_date'])) ?>
                                             </span>
@@ -235,7 +235,7 @@
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <?php if ($order['completed_at']): ?>
+                                        <?php if (isset($order['completed_at']) && $order['completed_at']): ?>
                                             <?= date('d.m.Y H:i', strtotime($order['completed_at'])) ?>
                                         <?php else: ?>
                                             <span class="text-muted">-</span>
