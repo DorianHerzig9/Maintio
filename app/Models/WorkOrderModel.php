@@ -263,9 +263,9 @@ class WorkOrderModel extends Model
     /**
      * Search work orders with proper escaping
      */
-    public function searchWorkOrders($query, $limit = 50)
+    public function searchWorkOrders($query, $limit = SEARCH_DEFAULT_LIMIT)
     {
-        if (empty($query) || strlen(trim($query)) < 2) {
+        if (empty($query) || strlen(trim($query)) < SEARCH_MIN_QUERY_LENGTH) {
             return [];
         }
 
@@ -274,9 +274,9 @@ class WorkOrderModel extends Model
 
         return $this->select('id, work_order_number, title, description, status, priority, created_at')
                     ->groupStart()
-                        ->like('work_order_number', $escapedQuery, 'both', false)
-                        ->orLike('title', $escapedQuery, 'both', false)
-                        ->orLike('description', $escapedQuery, 'both', false)
+                        ->like('work_order_number', $escapedQuery, 'both', true)
+                        ->orLike('title', $escapedQuery, 'both', true)
+                        ->orLike('description', $escapedQuery, 'both', true)
                     ->groupEnd()
                     ->orderBy('created_at', 'DESC')
                     ->limit($limit)

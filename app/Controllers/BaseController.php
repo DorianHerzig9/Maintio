@@ -159,4 +159,65 @@ abstract class BaseController extends Controller
 
         throw $e;
     }
+
+    /**
+     * Standard 404 Error Response
+     */
+    protected function render404(string $resource = 'Ressource'): ResponseInterface
+    {
+        $message = $resource . ' nicht gefunden';
+
+        if ($this->request->isAJAX() || $this->request->getHeaderLine('Accept') === 'application/json') {
+            return $this->response->setStatusCode(404)->setJSON([
+                'success' => false,
+                'message' => $message,
+                'timestamp' => date('c')
+            ]);
+        }
+
+        return $this->response->setStatusCode(404)->setBody(view('errors/custom', [
+            'title' => 'Fehler 404',
+            'message' => $message,
+            'statusCode' => 404
+        ]));
+    }
+
+    /**
+     * Standard 403 Error Response
+     */
+    protected function render403(string $action = 'Aktion'): ResponseInterface
+    {
+        $message = 'Zugriff verweigert: ' . $action . ' nicht erlaubt';
+
+        if ($this->request->isAJAX() || $this->request->getHeaderLine('Accept') === 'application/json') {
+            return $this->response->setStatusCode(403)->setJSON([
+                'success' => false,
+                'message' => $message,
+                'timestamp' => date('c')
+            ]);
+        }
+
+        return $this->response->setStatusCode(403)->setBody(view('errors/custom', [
+            'title' => 'Fehler 403',
+            'message' => $message,
+            'statusCode' => 403
+        ]));
+    }
+
+    /**
+     * Validation Error Response
+     */
+    protected function renderValidationError(array $errors): ResponseInterface
+    {
+        if ($this->request->isAJAX() || $this->request->getHeaderLine('Accept') === 'application/json') {
+            return $this->response->setStatusCode(422)->setJSON([
+                'success' => false,
+                'message' => 'Validierungsfehler',
+                'validation_errors' => $errors,
+                'timestamp' => date('c')
+            ]);
+        }
+
+        return redirect()->back()->withInput()->with('validation_errors', $errors);
+    }
 }

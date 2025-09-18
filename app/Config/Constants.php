@@ -77,3 +77,46 @@ defined('EXIT_USER_INPUT')     || define('EXIT_USER_INPUT', 7);     // invalid u
 defined('EXIT_DATABASE')       || define('EXIT_DATABASE', 8);       // database error
 defined('EXIT__AUTO_MIN')      || define('EXIT__AUTO_MIN', 9);      // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      || define('EXIT__AUTO_MAX', 125);    // highest automatically-assigned error code
+
+/*
+ | --------------------------------------------------------------------------
+ | Maintio Application Constants
+ | --------------------------------------------------------------------------
+ |
+ | Application-specific constants for the Maintio system
+ */
+
+// Dashboard-spezifische Konstanten
+defined('DASHBOARD_RECENT_WORK_ORDERS_LIMIT') || define('DASHBOARD_RECENT_WORK_ORDERS_LIMIT', 5);
+defined('DASHBOARD_UPCOMING_TASKS_LIMIT') || define('DASHBOARD_UPCOMING_TASKS_LIMIT', 5);
+defined('DASHBOARD_OVERDUE_WORK_ORDERS_LIMIT') || define('DASHBOARD_OVERDUE_WORK_ORDERS_LIMIT', 10);
+defined('DASHBOARD_DUE_SOON_WORK_ORDERS_LIMIT') || define('DASHBOARD_DUE_SOON_WORK_ORDERS_LIMIT', 10);
+defined('DASHBOARD_DUE_SOON_DAYS') || define('DASHBOARD_DUE_SOON_DAYS', 7);
+defined('DASHBOARD_UPCOMING_MAINTENANCE_DAYS') || define('DASHBOARD_UPCOMING_MAINTENANCE_DAYS', 14);
+
+// Search-spezifische Konstanten
+defined('SEARCH_MIN_QUERY_LENGTH') || define('SEARCH_MIN_QUERY_LENGTH', 2);
+defined('SEARCH_DEFAULT_LIMIT') || define('SEARCH_DEFAULT_LIMIT', 50);
+
+// Work Order-spezifische Konstanten
+defined('WORK_ORDER_DEFAULT_CREATED_BY') || define('WORK_ORDER_DEFAULT_CREATED_BY', 1);
+defined('WORK_ORDER_SEARCH_LIMIT') || define('WORK_ORDER_SEARCH_LIMIT', 20);
+
+// Validation-spezifische Konstanten
+defined('WORK_ORDER_TITLE_MAX_LENGTH') || define('WORK_ORDER_TITLE_MAX_LENGTH', 200);
+defined('WORK_ORDER_DESCRIPTION_MAX_LENGTH') || define('WORK_ORDER_DESCRIPTION_MAX_LENGTH', 1000);
+defined('ASSET_NAME_MAX_LENGTH') || define('ASSET_NAME_MAX_LENGTH', 200);
+defined('USER_NAME_MAX_LENGTH') || define('USER_NAME_MAX_LENGTH', 100);
+
+// Preventive Maintenance-spezifische Konstanten
+defined('PM_DEFAULT_LEAD_TIME_DAYS') || define('PM_DEFAULT_LEAD_TIME_DAYS', 7);
+defined('PM_SCHEDULE_NAME_MAX_LENGTH') || define('PM_SCHEDULE_NAME_MAX_LENGTH', 200);
+
+// Report-spezifische Konstanten
+defined('REPORT_DEFAULT_PAGE_LENGTH') || define('REPORT_DEFAULT_PAGE_LENGTH', 25);
+defined('REPORT_PDF_MAX_TEXT_LENGTH') || define('REPORT_PDF_MAX_TEXT_LENGTH', 20);
+defined('REPORT_CSV_SEPARATOR') || define('REPORT_CSV_SEPARATOR', ';');
+
+// Cache-spezifische Konstanten (für zukünftige Implementierung)
+defined('CACHE_DASHBOARD_STATS_TTL') || define('CACHE_DASHBOARD_STATS_TTL', 300); // 5 Minuten
+defined('CACHE_ASSET_STATS_TTL') || define('CACHE_ASSET_STATS_TTL', 600); // 10 Minuten
