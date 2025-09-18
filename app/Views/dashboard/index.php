@@ -230,7 +230,10 @@
             </div>
         </div>
     </div>
+</div>
 
+<!-- Overdue and Due Soon Work Orders -->
+<div class="row mb-4">
     <!-- Overdue Work Orders Widget -->
     <div class="col-lg-6 mb-4">
         <div class="card h-100">

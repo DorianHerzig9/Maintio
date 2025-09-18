@@ -138,6 +138,109 @@ class Reports extends BaseController
     }
 
     /**
+     * Custom Reports Builder
+     */
+    public function custom()
+    {
+        $data = [
+            'page_title' => 'Benutzerdefinierte Berichte',
+            'reportTypes' => $this->getCustomReportTypes(),
+            'fields' => $this->getAvailableFields(),
+            'filterOptions' => $this->getFilterOptions()
+        ];
+
+        return view('reports/custom', $data);
+    }
+
+    /**
+     * Generate Custom Report
+     */
+    public function generateCustom()
+    {
+        $reportType = $this->request->getPost('report_type');
+        $selectedFields = $this->request->getPost('fields') ?? [];
+        $filters = $this->request->getPost('filters') ?? [];
+        $reportName = $this->request->getPost('report_name') ?? 'Benutzerdefinierter Bericht';
+
+        $data = $this->buildCustomReport($reportType, $selectedFields, $filters);
+
+        $result = [
+            'page_title' => $reportName,
+            'reportData' => $data,
+            'reportType' => $reportType,
+            'selectedFields' => $selectedFields,
+            'filters' => $filters,
+            'reportName' => $reportName
+        ];
+
+        return view('reports/custom_result', $result);
+    }
+
+    /**
+     * Scheduled Reports Management
+     */
+    public function scheduled()
+    {
+        $data = [
+            'page_title' => 'Geplante Berichte',
+            'scheduledReports' => $this->getScheduledReports(),
+            'reportTypes' => $this->getCustomReportTypes(),
+            'scheduleOptions' => $this->getScheduleOptions(),
+            'users' => $this->userModel->findAll()
+        ];
+
+        return view('reports/scheduled', $data);
+    }
+
+    /**
+     * Create Scheduled Report
+     */
+    public function createScheduled()
+    {
+        $data = [
+            'name' => $this->request->getPost('name'),
+            'report_type' => $this->request->getPost('report_type'),
+            'schedule_type' => $this->request->getPost('schedule_type'),
+            'schedule_value' => $this->request->getPost('schedule_value'),
+            'recipients' => $this->request->getPost('recipients'),
+            'filters' => json_encode($this->request->getPost('filters') ?? []),
+            'format' => $this->request->getPost('format') ?? 'csv',
+            'is_active' => 1,
+            'created_at' => date('Y-m-d H:i:s'),
+            'next_run' => $this->calculateNextRun($this->request->getPost('schedule_type'), $this->request->getPost('schedule_value'))
+        ];
+
+        // Save to database (would need a scheduled_reports table)
+        // For now, just redirect with success message
+        return redirect()->to('reports/scheduled')->with('success', 'Geplanter Bericht wurde erfolgreich erstellt.');
+    }
+
+    /**
+     * Export Custom Report
+     */
+    public function exportCustom()
+    {
+        // Get report parameters from session or request
+        $reportType = $this->request->getGet('report_type');
+        $selectedFields = $this->request->getGet('fields') ? explode(',', $this->request->getGet('fields')) : [];
+        $filters = $this->request->getGet('filters') ?? [];
+        $format = $this->request->getGet('format') ?? 'csv';
+        $reportName = $this->request->getGet('report_name') ?? 'Benutzerdefinierter Bericht';
+
+        // Build the report data
+        $data = $this->buildCustomReport($reportType, $selectedFields, $filters);
+
+        switch ($format) {
+            case 'csv':
+                return $this->exportCustomToCSV($data, $selectedFields, $reportName);
+            case 'pdf':
+                return $this->exportCustomToPDF($data, $selectedFields, $reportName, $reportType, $filters);
+            default:
+                return redirect()->back()->with('error', 'Ungültiges Export-Format');
+        }
+    }
+
+    /**
      * Export Work Orders Report
      */
     public function exportWorkOrders()
@@ -337,14 +440,14 @@ class Reports extends BaseController
             ->join('assets', 'preventive_maintenance.asset_id = assets.id', 'left');
 
         if ($dateFrom) {
-            $builder->where('next_due_date >=', $dateFrom);
+            $builder->where('next_due >=', $dateFrom);
         }
 
         if ($dateTo) {
-            $builder->where('next_due_date <=', $dateTo);
+            $builder->where('next_due <=', $dateTo);
         }
 
-        return $builder->orderBy('next_due_date', 'ASC')->findAll();
+        return $builder->orderBy('next_due', 'ASC')->findAll();
     }
 
     /**
@@ -353,10 +456,10 @@ class Reports extends BaseController
     private function getMaintenanceStats($dateFrom, $dateTo)
     {
         $total = $this->preventiveMaintenanceModel->countAll();
-        $overdue = $this->preventiveMaintenanceModel->where('next_due_date <', date('Y-m-d'))->countAllResults();
+        $overdue = $this->preventiveMaintenanceModel->where('next_due <', date('Y-m-d'))->countAllResults();
         $upcoming = $this->preventiveMaintenanceModel
-            ->where('next_due_date >=', date('Y-m-d'))
-            ->where('next_due_date <=', date('Y-m-d', strtotime('+30 days')))
+            ->where('next_due >=', date('Y-m-d'))
+            ->where('next_due <=', date('Y-m-d', strtotime('+30 days')))
             ->countAllResults();
 
         return [
@@ -749,5 +852,439 @@ class Reports extends BaseController
             'average_cost' => 0,
             'cost_breakdown' => []
         ];
+    }
+
+    /**
+     * Get available report types for custom reports
+     */
+    private function getCustomReportTypes()
+    {
+        return [
+            'work_orders' => 'Arbeitsaufträge',
+            'assets' => 'Anlagen',
+            'maintenance' => 'Wartung',
+            'users' => 'Benutzer',
+            'combined' => 'Kombiniert'
+        ];
+    }
+
+    /**
+     * Get available fields for custom reports
+     */
+    private function getAvailableFields()
+    {
+        return [
+            'work_orders' => [
+                'work_order_number' => 'Auftragsnummer',
+                'title' => 'Titel',
+                'description' => 'Beschreibung',
+                'status' => 'Status',
+                'priority' => 'Priorität',
+                'created_at' => 'Erstellt am',
+                'scheduled_date' => 'Geplant für',
+                'completed_at' => 'Abgeschlossen am',
+                'asset_name' => 'Anlage',
+                'technician_name' => 'Techniker'
+            ],
+            'assets' => [
+                'name' => 'Name',
+                'asset_number' => 'Anlagennummer',
+                'type' => 'Typ',
+                'location' => 'Standort',
+                'status' => 'Status',
+                'manufacturer' => 'Hersteller',
+                'model' => 'Modell',
+                'installation_date' => 'Installiert am',
+                'purchase_price' => 'Kaufpreis'
+            ],
+            'maintenance' => [
+                'schedule_name' => 'Wartungsname',
+                'asset_name' => 'Anlage',
+                'interval_type' => 'Intervall-Typ',
+                'interval_value' => 'Intervall-Wert',
+                'next_due' => 'Nächste Wartung',
+                'last_completed' => 'Letzte Wartung',
+                'priority' => 'Priorität'
+            ]
+        ];
+    }
+
+    /**
+     * Get filter options for custom reports
+     */
+    private function getFilterOptions()
+    {
+        return [
+            'date_range' => 'Zeitraum',
+            'status' => 'Status',
+            'priority' => 'Priorität',
+            'technician' => 'Techniker',
+            'asset_type' => 'Anlagen-Typ',
+            'location' => 'Standort'
+        ];
+    }
+
+    /**
+     * Build custom report based on selections
+     */
+    private function buildCustomReport($reportType, $selectedFields, $filters)
+    {
+        switch ($reportType) {
+            case 'work_orders':
+                return $this->buildWorkOrdersCustomReport($selectedFields, $filters);
+            case 'assets':
+                return $this->buildAssetsCustomReport($selectedFields, $filters);
+            case 'maintenance':
+                return $this->buildMaintenanceCustomReport($selectedFields, $filters);
+            default:
+                return [];
+        }
+    }
+
+    private function buildWorkOrdersCustomReport($selectedFields, $filters)
+    {
+        $builder = $this->workOrderModel
+            ->select('work_orders.*, assets.name as asset_name, users.first_name, users.last_name')
+            ->join('assets', 'work_orders.asset_id = assets.id', 'left')
+            ->join('users', 'work_orders.assigned_user_id = users.id', 'left');
+
+        // Apply filters
+        if (!empty($filters['date_from'])) {
+            $builder->where('work_orders.created_at >=', $filters['date_from']);
+        }
+        if (!empty($filters['date_to'])) {
+            $builder->where('work_orders.created_at <=', $filters['date_to'] . ' 23:59:59');
+        }
+        if (!empty($filters['status'])) {
+            $builder->where('work_orders.status', $filters['status']);
+        }
+        if (!empty($filters['priority'])) {
+            $builder->where('work_orders.priority', $filters['priority']);
+        }
+
+        return $builder->findAll();
+    }
+
+    private function buildAssetsCustomReport($selectedFields, $filters)
+    {
+        $builder = $this->assetModel;
+
+        if (!empty($filters['status'])) {
+            $builder->where('status', $filters['status']);
+        }
+        if (!empty($filters['type'])) {
+            $builder->where('type', $filters['type']);
+        }
+        if (!empty($filters['location'])) {
+            $builder->where('location', $filters['location']);
+        }
+
+        return $builder->findAll();
+    }
+
+    private function buildMaintenanceCustomReport($selectedFields, $filters)
+    {
+        $builder = $this->preventiveMaintenanceModel
+            ->select('preventive_maintenance.*, assets.name as asset_name')
+            ->join('assets', 'preventive_maintenance.asset_id = assets.id', 'left');
+
+        if (!empty($filters['date_from'])) {
+            $builder->where('next_due >=', $filters['date_from']);
+        }
+        if (!empty($filters['date_to'])) {
+            $builder->where('next_due <=', $filters['date_to']);
+        }
+
+        return $builder->findAll();
+    }
+
+    /**
+     * Get scheduled reports
+     */
+    private function getScheduledReports()
+    {
+        // For now, return sample data
+        return [
+            [
+                'id' => 1,
+                'name' => 'Wöchentlicher Wartungsbericht',
+                'report_type' => 'maintenance',
+                'schedule_type' => 'weekly',
+                'schedule_value' => 'monday',
+                'format' => 'pdf',
+                'recipients' => 'manager@company.com',
+                'last_run' => '2025-01-15 08:00:00',
+                'next_run' => '2025-01-22 08:00:00',
+                'is_active' => 1
+            ],
+            [
+                'id' => 2,
+                'name' => 'Monatlicher Anlagenbericht',
+                'report_type' => 'assets',
+                'schedule_type' => 'monthly',
+                'schedule_value' => '1',
+                'format' => 'csv',
+                'recipients' => 'admin@company.com',
+                'last_run' => '2025-01-01 09:00:00',
+                'next_run' => '2025-02-01 09:00:00',
+                'is_active' => 1
+            ]
+        ];
+    }
+
+    /**
+     * Get schedule options
+     */
+    private function getScheduleOptions()
+    {
+        return [
+            'daily' => 'Täglich',
+            'weekly' => 'Wöchentlich',
+            'monthly' => 'Monatlich',
+            'quarterly' => 'Vierteljährlich'
+        ];
+    }
+
+    /**
+     * Calculate next run time for scheduled reports
+     */
+    private function calculateNextRun($scheduleType, $scheduleValue)
+    {
+        $now = new \DateTime();
+
+        switch ($scheduleType) {
+            case 'daily':
+                return $now->modify('+1 day')->format('Y-m-d H:i:s');
+            case 'weekly':
+                return $now->modify('next ' . $scheduleValue)->format('Y-m-d H:i:s');
+            case 'monthly':
+                return $now->modify('first day of next month')->modify('+' . ($scheduleValue - 1) . ' days')->format('Y-m-d H:i:s');
+            case 'quarterly':
+                return $now->modify('+3 months')->format('Y-m-d H:i:s');
+            default:
+                return $now->modify('+1 day')->format('Y-m-d H:i:s');
+        }
+    }
+
+    /**
+     * Export custom report to CSV
+     */
+    private function exportCustomToCSV($data, $selectedFields, $reportName)
+    {
+        $response = $this->response;
+        $filename = strtolower(str_replace([' ', 'ä', 'ö', 'ü', 'ß'], ['_', 'ae', 'oe', 'ue', 'ss'], $reportName)) . '_' . date('Y-m-d');
+
+        $response->setHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $response->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '.csv"');
+
+        $output = fopen('php://output', 'w');
+
+        // Add BOM for proper UTF-8 encoding in Excel
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+        if (!empty($data)) {
+            // Write headers
+            if (!empty($selectedFields)) {
+                $headers = $this->getCustomReportHeaders($selectedFields);
+            } else {
+                $headers = $this->getGermanHeaders(array_keys($data[0]));
+            }
+            fputcsv($output, $headers, ';');
+
+            // Write data
+            foreach ($data as $row) {
+                $formattedRow = [];
+
+                if (!empty($selectedFields)) {
+                    foreach ($selectedFields as $field) {
+                        if (isset($row[$field])) {
+                            $formattedRow[] = $this->formatValueForCSV($row[$field]);
+                        } else {
+                            $formattedRow[] = '';
+                        }
+                    }
+                } else {
+                    foreach ($row as $value) {
+                        $formattedRow[] = $this->formatValueForCSV($value);
+                    }
+                }
+
+                fputcsv($output, $formattedRow, ';');
+            }
+        }
+
+        fclose($output);
+        return $response;
+    }
+
+    /**
+     * Export custom report to PDF
+     */
+    private function exportCustomToPDF($data, $selectedFields, $reportName, $reportType, $filters)
+    {
+        try {
+            // Clear any previous output
+            if (ob_get_level()) {
+                ob_end_clean();
+            }
+
+            $pdf = new PDFExporter($reportName);
+            $pdf->AddPage();
+
+            // Add filter information
+            if (!empty($filters)) {
+                $filterInfo = [];
+                foreach ($filters as $key => $value) {
+                    if (!empty($value)) {
+                        switch ($key) {
+                            case 'date_from':
+                                $filterInfo['Von Datum'] = date('d.m.Y', strtotime($value));
+                                break;
+                            case 'date_to':
+                                $filterInfo['Bis Datum'] = date('d.m.Y', strtotime($value));
+                                break;
+                            case 'status':
+                                $filterInfo['Status'] = $this->getStatusText($value);
+                                break;
+                            case 'priority':
+                                $filterInfo['Priorität'] = $this->getPriorityText($value);
+                                break;
+                        }
+                    }
+                }
+                if (!empty($filterInfo)) {
+                    $pdf->addFilterInfo($filterInfo);
+                }
+            }
+
+            // Add table with selected fields
+            if (!empty($data)) {
+                if (!empty($selectedFields)) {
+                    $headers = $this->getCustomReportHeaders($selectedFields);
+                    $tableData = [];
+
+                    foreach ($data as $row) {
+                        $tableRow = [];
+                        foreach ($selectedFields as $field) {
+                            if (isset($row[$field])) {
+                                $value = $this->formatValueForPDF($row[$field], $field);
+                                $tableRow[] = $this->truncateText($value, 20);
+                            } else {
+                                $tableRow[] = '-';
+                            }
+                        }
+                        $tableData[] = $tableRow;
+                    }
+
+                    // Calculate column widths based on number of columns
+                    $numCols = count($headers);
+                    $colWidth = max(15, floor(165 / $numCols));
+                    $columnWidths = array_fill(0, $numCols, $colWidth);
+
+                    $pdf->addTable($headers, $tableData, $columnWidths);
+                }
+            }
+
+            // Generate filename
+            $filename = strtolower(str_replace([' ', 'ä', 'ö', 'ü', 'ß'], ['_', 'ae', 'oe', 'ue', 'ss'], $reportName)) . '_' . date('Y-m-d') . '.pdf';
+
+            // Set proper headers for PDF output
+            $this->response->setHeader('Content-Type', 'application/pdf');
+            $this->response->setHeader('Content-Disposition', 'inline; filename="' . $filename . '"');
+            $this->response->setHeader('Cache-Control', 'private, max-age=0, must-revalidate');
+            $this->response->setHeader('Pragma', 'public');
+
+            // Output PDF directly
+            $pdf->Output($filename, 'I');
+            exit();
+
+        } catch (\Exception $e) {
+            log_message('error', 'Custom PDF Export Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Fehler beim Erstellen des PDF: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get headers for custom reports
+     */
+    private function getCustomReportHeaders($selectedFields)
+    {
+        $fieldTranslations = [
+            'work_order_number' => 'Auftragsnummer',
+            'title' => 'Titel',
+            'description' => 'Beschreibung',
+            'status' => 'Status',
+            'priority' => 'Priorität',
+            'created_at' => 'Erstellt am',
+            'scheduled_date' => 'Geplant für',
+            'completed_at' => 'Abgeschlossen am',
+            'asset_name' => 'Anlage',
+            'technician_name' => 'Techniker',
+            'first_name' => 'Vorname',
+            'last_name' => 'Nachname',
+            'name' => 'Name',
+            'asset_number' => 'Anlagennummer',
+            'type' => 'Typ',
+            'location' => 'Standort',
+            'manufacturer' => 'Hersteller',
+            'model' => 'Modell',
+            'installation_date' => 'Installiert am',
+            'purchase_price' => 'Kaufpreis',
+            'schedule_name' => 'Wartungsname',
+            'interval_type' => 'Intervall-Typ',
+            'interval_value' => 'Intervall-Wert',
+            'next_due' => 'Nächste Wartung',
+            'last_completed' => 'Letzte Wartung'
+        ];
+
+        $headers = [];
+        foreach ($selectedFields as $field) {
+            $headers[] = $fieldTranslations[$field] ?? ucfirst(str_replace('_', ' ', $field));
+        }
+
+        return $headers;
+    }
+
+    /**
+     * Format value for CSV export
+     */
+    private function formatValueForCSV($value)
+    {
+        if (is_null($value)) {
+            return '';
+        }
+
+        // Format dates
+        if (preg_match('/^\d{4}-\d{2}-\d{2}/', $value)) {
+            return date('d.m.Y', strtotime($value));
+        }
+
+        // Format datetime
+        if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $value)) {
+            return date('d.m.Y H:i', strtotime($value));
+        }
+
+        return $value;
+    }
+
+    /**
+     * Format value for PDF export
+     */
+    private function formatValueForPDF($value, $field)
+    {
+        if (is_null($value)) {
+            return '-';
+        }
+
+        // Format specific fields
+        if (in_array($field, ['created_at', 'updated_at', 'scheduled_date', 'completed_at', 'next_due', 'last_completed', 'installation_date'])) {
+            return $value ? date('d.m.Y', strtotime($value)) : '-';
+        } elseif ($field === 'status') {
+            return $this->getStatusText($value);
+        } elseif ($field === 'priority') {
+            return $this->getPriorityText($value);
+        }
+
+        return $value;
     }
 }

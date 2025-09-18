@@ -82,8 +82,13 @@ $routes->group('reports', function($routes) {
     $routes->get('assets', 'Reports::assets');
     $routes->get('maintenance', 'Reports::maintenance');
     $routes->get('performance', 'Reports::performance');
+    $routes->get('custom', 'Reports::custom');
+    $routes->post('generate-custom', 'Reports::generateCustom');
+    $routes->get('scheduled', 'Reports::scheduled');
+    $routes->post('create-scheduled', 'Reports::createScheduled');
     $routes->get('export-work-orders', 'Reports::exportWorkOrders');
     $routes->get('export-assets', 'Reports::exportAssets');
+    $routes->get('export-custom', 'Reports::exportCustom');
 });
 
 // Settings Routes

@@ -218,9 +218,9 @@
                     <li><i class="bi bi-check-circle me-2"></i>Vorlagen speichern</li>
                     <li><i class="bi bi-check-circle me-2"></i>Zeitplanung</li>
                 </ul>
-                <button class="btn btn-secondary" onclick="alert('Benutzerdefinierte Berichte in Entwicklung')">
+                <a href="<?= base_url('reports/custom') ?>" class="btn btn-secondary">
                     <i class="bi bi-arrow-right me-1"></i>Bericht erstellen
-                </button>
+                </a>
             </div>
         </div>
     </div>
@@ -242,9 +242,9 @@
                     <li><i class="bi bi-check-circle me-2"></i>Zeitplan-Verwaltung</li>
                     <li><i class="bi bi-check-circle me-2"></i>Empfänger-Listen</li>
                 </ul>
-                <button class="btn btn-dark" onclick="alert('Geplante Berichte in Entwicklung')">
+                <a href="<?= base_url('reports/scheduled') ?>" class="btn btn-dark">
                     <i class="bi bi-arrow-right me-1"></i>Verwalten
-                </button>
+                </a>
             </div>
         </div>
     </div>

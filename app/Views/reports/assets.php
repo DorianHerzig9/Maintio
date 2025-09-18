@@ -6,7 +6,6 @@
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2><i class="bi bi-cpu me-2"></i><?= $page_title ?></h2>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="<?= base_url('reports') ?>">Berichte</a></li>
