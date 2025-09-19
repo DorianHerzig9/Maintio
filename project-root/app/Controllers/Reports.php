@@ -305,7 +305,7 @@ class Reports extends BaseController
             'total_assets' => $this->assetModel->countAll(),
             'critical_assets' => $this->assetModel->where('status', 'critical')->countAllResults(),
             'total_users' => $this->userModel->countAll(),
-            'active_technicians' => $this->userModel->where('role', 'technician')->where('is_active', 1)->countAllResults()
+            'active_technicians' => $this->userModel->where('role', 'technician')->where('status', 'active')->countAllResults()
         ];
     }
 

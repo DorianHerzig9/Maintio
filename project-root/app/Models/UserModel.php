@@ -14,7 +14,7 @@ class UserModel extends Model
     protected $protectFields = true;
     protected $allowedFields = [
         'username', 'email', 'first_name', 'last_name', 'password_hash',
-        'role', 'department', 'phone', 'is_active', 'last_login',
+        'role', 'department', 'phone', 'status', 'last_login',
         'avatar', 'preferences'
     ];
 
@@ -23,7 +23,6 @@ class UserModel extends Model
 
     protected array $casts = [
         'id' => 'integer',
-        'is_active' => 'boolean',
         'last_login' => '?datetime',
         'preferences' => '?json'
     ];
@@ -47,7 +46,7 @@ class UserModel extends Model
         'role' => 'required|in_list[admin,manager,technician,viewer]',
         'department' => 'permit_empty|max_length[100]',
         'phone' => 'permit_empty|max_length[20]',
-        'is_active' => 'permit_empty|in_list[0,1]'
+        'status' => 'permit_empty|in_list[active,inactive]'
     ];
     
     protected $validationMessages = [
@@ -132,7 +131,7 @@ class UserModel extends Model
     {
         return $this->where('username', $login)
                     ->orWhere('email', $login)
-                    ->where('is_active', 1)
+                    ->where('status', 'active')
                     ->where('deleted_at', null)
                     ->first();
     }
@@ -154,7 +153,7 @@ class UserModel extends Model
     public function getUsersByRole($role)
     {
         return $this->where('role', $role)
-                    ->where('is_active', 1)
+                    ->where('status', 'active')
                     ->where('deleted_at', null)
                     ->findAll();
     }
@@ -166,7 +165,7 @@ class UserModel extends Model
     {
         return $this->select('id, username, first_name, last_name, email')
                     ->where('role', 'technician')
-                    ->where('is_active', 1)
+                    ->where('status', 'active')
                     ->where('deleted_at', null)
                     ->orderBy('first_name', 'ASC')
                     ->findAll();
@@ -181,8 +180,8 @@ class UserModel extends Model
 
         $query = "SELECT
                     COUNT(*) as total,
-                    SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active,
-                    SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END) as inactive,
+                    SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active,
+                    SUM(CASE WHEN status = 'inactive' THEN 1 ELSE 0 END) as inactive,
                     SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) as admin_count,
                     SUM(CASE WHEN role = 'manager' THEN 1 ELSE 0 END) as manager_count,
                     SUM(CASE WHEN role = 'technician' THEN 1 ELSE 0 END) as technician_count,
@@ -218,7 +217,7 @@ class UserModel extends Model
      */
     public function getUserSafe($userId)
     {
-        return $this->select('id, username, first_name, last_name, email, role, department, phone, is_active, created_at, updated_at')
+        return $this->select('id, username, first_name, last_name, email, role, department, phone, status, created_at, updated_at')
                     ->where('id', $userId)
                     ->where('deleted_at', null)
                     ->first();

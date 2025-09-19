@@ -297,6 +297,116 @@ class PreventiveMaintenance extends BaseController
     }
 
     /**
+     * Show modal with maintenance and inspection work orders for selection
+     */
+    public function getCompletedWorkOrders()
+    {
+        $maintenanceOrders = $this->workOrderModel
+            ->select('work_orders.*, assets.name as asset_name, assets.asset_number')
+            ->join('assets', 'assets.id = work_orders.asset_id', 'left')
+            ->whereIn('work_orders.type', ['instandhaltung', 'inspektion'])
+            ->orderBy('work_orders.created_at', 'DESC')
+            ->limit(100)
+            ->findAll();
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $maintenanceOrders
+        ]);
+    }
+
+    /**
+     * Create preventive maintenance schedules from selected work orders
+     */
+    public function createSchedulesFromWorkOrders()
+    {
+        $selectedOrders = $this->request->getJSON(true)['selected_orders'] ?? [];
+        $createdCount = 0;
+        $errors = [];
+
+        foreach ($selectedOrders as $orderData) {
+            $workOrderId = $orderData['work_order_id'];
+            $intervalType = $orderData['interval_type'];
+            $intervalValue = $orderData['interval_value'];
+
+            $workOrder = $this->workOrderModel->find($workOrderId);
+
+            if (!$workOrder) {
+                $errors[] = "Arbeitsauftrag mit ID {$workOrderId} nicht gefunden.";
+                continue;
+            }
+
+            // Calculate next due date based on interval
+            $nextDue = $this->calculateNextDueDate($intervalType, $intervalValue);
+
+            $scheduleData = [
+                'asset_id' => $workOrder['asset_id'],
+                'schedule_name' => str_replace('PM: ', '', $workOrder['title']),
+                'description' => $workOrder['description'],
+                'task_details' => $workOrder['notes'] ?? '',
+                'interval_type' => $intervalType,
+                'interval_value' => $intervalValue,
+                'priority' => $workOrder['priority'],
+                'estimated_duration' => $workOrder['estimated_duration'],
+                'assigned_user_id' => $workOrder['assigned_user_id'],
+                'auto_generate_work_orders' => 1,
+                'lead_time_days' => 7,
+                'next_due' => $nextDue,
+                'is_active' => 1,
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+
+            try {
+                if ($this->pmModel->save($scheduleData)) {
+                    $createdCount++;
+                } else {
+                    $errors[] = "Fehler beim Erstellen des Instandhaltungsplans für: {$workOrder['title']}";
+                }
+            } catch (\Exception $e) {
+                $errors[] = "Fehler beim Erstellen des Instandhaltungsplans für {$workOrder['title']}: " . $e->getMessage();
+            }
+        }
+
+        return $this->response->setJSON([
+            'success' => $createdCount > 0,
+            'message' => "{$createdCount} Instandhaltungspläne wurden erfolgreich erstellt.",
+            'created_count' => $createdCount,
+            'errors' => $errors
+        ]);
+    }
+
+    /**
+     * Calculate next due date based on interval
+     */
+    private function calculateNextDueDate($intervalType, $intervalValue)
+    {
+        $now = new \DateTime();
+
+        switch ($intervalType) {
+            case 'daily':
+                $now->add(new \DateInterval("P{$intervalValue}D"));
+                break;
+            case 'weekly':
+                $now->add(new \DateInterval("P" . ($intervalValue * 7) . "D"));
+                break;
+            case 'monthly':
+                $now->add(new \DateInterval("P{$intervalValue}M"));
+                break;
+            case 'quarterly':
+                $now->add(new \DateInterval("P" . ($intervalValue * 3) . "M"));
+                break;
+            case 'annually':
+                $now->add(new \DateInterval("P{$intervalValue}Y"));
+                break;
+            default:
+                $now->add(new \DateInterval("P30D")); // Default to 30 days
+                break;
+        }
+
+        return $now->format('Y-m-d H:i:s');
+    }
+
+    /**
      * Generate work orders for due maintenance
      */
     public function generateWorkOrders()

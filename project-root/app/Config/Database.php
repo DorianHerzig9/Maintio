@@ -20,11 +20,41 @@ class Database extends Config
     public string $defaultGroup = 'default';
 
     /**
-     * The default database connection.
+     * The default database connection - MySQL/MariaDB.
      *
      * @var array<string, mixed>
      */
     public array $default = [
+        'DSN'      => '',
+        'hostname' => 'localhost',
+        'username' => 'root',
+        'password' => '',  // Default XAMPP password is empty
+        'database' => 'maintio',
+        'DBDriver' => 'MySQLi',
+        'DBPrefix' => '',
+        'pConnect' => false,
+        'DBDebug'  => ENVIRONMENT === 'development',
+        'charset'  => 'utf8mb4',
+        'DBCollat' => 'utf8mb4_unicode_ci',
+        'swapPre'  => '',
+        'encrypt'  => false,
+        'compress' => false,
+        'strictOn' => false,
+        'failover' => [],
+        'port'     => 3306,
+        'dateFormat' => [
+            'date'     => 'Y-m-d',
+            'datetime' => 'Y-m-d H:i:s',
+            'time'     => 'H:i:s',
+        ],
+    ];
+
+    /**
+     * SQLite backup connection (for fallback or migration).
+     *
+     * @var array<string, mixed>
+     */
+    public array $sqlite_backup = [
         'database'    => WRITEPATH . 'database' . DIRECTORY_SEPARATOR . 'maintio.db',
         'DBDriver'    => 'SQLite3',
         'DBPrefix'    => '',

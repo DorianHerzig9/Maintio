@@ -217,10 +217,10 @@ class WorkOrderModel extends Model
                     SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_count,
                     SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled_count,
                     SUM(CASE WHEN status = 'on_hold' THEN 1 ELSE 0 END) as on_hold_count,
-                    SUM(CASE WHEN priority = 'low' THEN 1 ELSE 0 END) as low_priority,
-                    SUM(CASE WHEN priority = 'medium' THEN 1 ELSE 0 END) as medium_priority,
-                    SUM(CASE WHEN priority = 'high' THEN 1 ELSE 0 END) as high_priority,
-                    SUM(CASE WHEN priority = 'critical' THEN 1 ELSE 0 END) as critical_priority,
+                    SUM(CASE WHEN priority = 'low' THEN 1 ELSE 0 END) as priority_low,
+                    SUM(CASE WHEN priority = 'medium' THEN 1 ELSE 0 END) as priority_medium,
+                    SUM(CASE WHEN priority = 'high' THEN 1 ELSE 0 END) as priority_high,
+                    SUM(CASE WHEN priority = 'critical' THEN 1 ELSE 0 END) as priority_critical,
                     SUM(CASE WHEN type = 'instandhaltung' THEN 1 ELSE 0 END) as instandhaltung_type,
                     SUM(CASE WHEN type = 'instandsetzung' THEN 1 ELSE 0 END) as instandsetzung_type,
                     SUM(CASE WHEN type = 'inspektion' THEN 1 ELSE 0 END) as inspektion_type,
@@ -239,10 +239,10 @@ class WorkOrderModel extends Model
                 ['status' => 'on_hold', 'count' => (int) $result['on_hold_count']]
             ],
             'by_priority' => [
-                ['priority' => 'low', 'count' => (int) $result['low_priority']],
-                ['priority' => 'medium', 'count' => (int) $result['medium_priority']],
-                ['priority' => 'high', 'count' => (int) $result['high_priority']],
-                ['priority' => 'critical', 'count' => (int) $result['critical_priority']]
+                ['priority' => 'low', 'count' => (int) $result['priority_low']],
+                ['priority' => 'medium', 'count' => (int) $result['priority_medium']],
+                ['priority' => 'high', 'count' => (int) $result['priority_high']],
+                ['priority' => 'critical', 'count' => (int) $result['priority_critical']]
             ],
             'by_type' => [
                 ['type' => 'instandhaltung', 'count' => (int) $result['instandhaltung_type']],

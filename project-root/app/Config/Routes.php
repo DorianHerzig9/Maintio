@@ -60,6 +60,8 @@ $routes->group('api/preventive-maintenance', function($routes) {
     $routes->get('overdue', 'PreventiveMaintenance::getOverdue');
     $routes->get('upcoming/(:num)', 'PreventiveMaintenance::getUpcoming/$1');
     $routes->get('stats', 'PreventiveMaintenance::getStats');
+    $routes->get('completed-work-orders', 'PreventiveMaintenance::getCompletedWorkOrders');
+    $routes->post('create-schedules-from-work-orders', 'PreventiveMaintenance::createSchedulesFromWorkOrders');
 });
 
 // Users Routes
